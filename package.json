@@ -1,7 +1,7 @@
 {
   "name": "vana-cargo",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vana Cargo - Offline FFXI inventory viewer",
   "author": "Mandracord Team",
   "license": "MIT",

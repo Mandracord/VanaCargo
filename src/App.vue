@@ -7,16 +7,15 @@ import { luaToJson } from "./utils/luaParser";
 declare global {
   interface Window {
     electronAPI?: {
-      selectFolder: () => Promise<
-        | {
-            root: string;
-            files: Array<{ path: string; content: string }>;
-          }
-        | null
-      >;
+      selectFolder: () => Promise<{
+        root: string;
+        files: Array<{ path: string; content: string }>;
+      } | null>;
+      openExternal: (url: string) => void;
     };
   }
 }
+
 
 type Item = { id: number; en?: string; category?: string };
 type KeyItem = { id: number; en?: string; category?: string };
@@ -50,6 +49,7 @@ const pageSizes = [25, 50, 75, 100];
 const theme = ref<"light" | "dark">("light");
 const rootPath = ref("");
 const githubUrl = "https://github.com/Mandracord/VanaCargo";
+
 type VirtualFile = {
   name: string;
   webkitRelativePath: string;
@@ -59,6 +59,60 @@ type VirtualFile = {
 const folderFiles = ref<VirtualFile[]>([]);
 
 const route = useRoute();
+
+function rowsToCSV(rows: Row[]) {
+  const headers = [
+    "character",
+    "storage",
+    "item_id",
+    "item_name",
+    "count",
+    "category",
+    "description",
+  ];
+
+  const escape = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+  const lines = [
+    headers.join(","),
+    ...rows.map((r) =>
+      [
+        activeName.value,
+        displayStorage(r.group),
+        r.id,
+        r.name,
+        r.count ?? "",
+        r.category ?? "",
+        r.desc ?? "",
+      ]
+        .map(escape)
+        .join(",")
+    ),
+  ];
+
+  return lines.join("\n");
+}
+
+async function exportCSV() {
+  const csv = rowsToCSV(tableRows.value);
+
+  const filename = `VanaCargo_${activeName.value}_inventory.csv`;
+
+  if ((window as any).electronAPI?.saveFile) {
+    await (window as any).electronAPI.saveFile(filename, csv);
+    return;
+  }
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
 
 const activeInventory = computed<Inventory>(
   () => inventories.value[activeName.value] || {}
@@ -77,7 +131,6 @@ const keyItemList = computed(() => {
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 });
-
 const itemGroups = computed(() => {
   const entries = Object.entries(activeInventory.value).filter(
     ([name]) => name !== "gil" && name !== "key items"
@@ -97,11 +150,7 @@ const itemGroups = computed(() => {
 
 const storageTabs = [
   { label: "All", route: { name: "all" }, icon: "fa-layer-group" },
-  {
-    label: "Inventory",
-    route: { name: "inventory" },
-    icon: "fa-box",
-  },
+  { label: "Inventory", route: { name: "inventory" }, icon: "fa-box" },
   { label: "Mog Safe", route: { name: "mog-safe" }, icon: "fa-vault" },
   { label: "Storage", route: { name: "storage" }, icon: "fa-warehouse" },
   { label: "Mog Locker", route: { name: "mog-locker" }, icon: "fa-lock" },
@@ -240,10 +289,12 @@ onMounted(() => {
   } else {
     applyTheme(theme.value);
   }
+
   const storedRoot = localStorage.getItem("rootPath");
   if (storedRoot) {
     rootPath.value = storedRoot;
   }
+
   const storedChars = localStorage.getItem("characters");
   if (storedChars) {
     try {
@@ -255,10 +306,9 @@ onMounted(() => {
         characters.value = parsed;
         activeName.value = parsed[0]?.name ?? "";
       }
-    } catch {
-      // ignore
-    }
+    } catch {}
   }
+
   const cached = localStorage.getItem("cacheData");
   if (cached) {
     try {
@@ -278,10 +328,9 @@ onMounted(() => {
         activeName.value = parsed.characters[0]?.name ?? "";
       }
       cachedLoaded.value = true;
-    } catch {
-      // ignore cache errors
-    }
+    } catch {}
   }
+
   loadData();
 });
 
@@ -297,6 +346,7 @@ async function loadData() {
       error.value = "Select your Windower folder to load data.";
       return;
     }
+
     localStorage.setItem(
       "cacheData",
       JSON.stringify({
@@ -372,6 +422,7 @@ async function loadFromFolder() {
       "FindAll addon not detected. Please select a Windower root with addons/findall installed.";
     return;
   }
+
   const find = (rel: string) => {
     const target = normalizePath(rel).replace(/^\/+/, "");
     return folderFiles.value.find((f) =>
@@ -385,10 +436,12 @@ async function loadFromFolder() {
   if (!itemsFile || !keyItemsFile) {
     throw new Error("Required res files not found in selected folder.");
   }
+
   const readLua = async (file: VirtualFile) => {
     const text = await file.text();
     return luaToJson(text);
   };
+
   items.value = await readLua(itemsFile);
   keyItems.value = await readLua(keyItemsFile);
   descriptions.value = descFile ? await readLua(descFile) : {};
@@ -398,12 +451,14 @@ async function loadFromFolder() {
       normalizePath(f.webkitRelativePath || f.name)
     )
   );
+
   const nextChars = charFiles.map((f) => {
     const rel = normalizePath(f.webkitRelativePath || f.name);
     const nameMatch = rel.match(/addons[/\\]findall[/\\]data[/\\](.+)\.lua$/i);
     const name = nameMatch && nameMatch[1] ? nameMatch[1] : rel;
     return { name, file: rel };
   });
+
   if (nextChars.length) {
     characters.value = nextChars;
     activeName.value = nextChars[0]?.name ?? "";
@@ -412,12 +467,14 @@ async function loadFromFolder() {
       "Missing addons/findall/data character files. This addon is required.";
     return;
   }
+
   for (const f of charFiles) {
     const rel = normalizePath(f.webkitRelativePath || f.name);
     const nameMatch = rel.match(/addons[/\\]findall[/\\]data[/\\](.+)\.lua$/i);
     const name = nameMatch && nameMatch[1] ? nameMatch[1] : rel;
     inventories.value[name] = await readLua(f);
   }
+
   error.value = "";
 }
 
@@ -463,7 +520,6 @@ async function selectFolderNative() {
   }
 }
 </script>
-
 <template>
   <div :class="['app', theme === 'dark' ? 'theme-dark' : 'theme-light']">
     <header class="card header relative">
@@ -573,62 +629,41 @@ async function selectFolderNative() {
         </div>
 
         <div class="card">
-          <div class="card-head">
-            <div></div>
-            <div class="meta">
-              <span
-                ><i class="fa-solid fa-coins"></i> Gil:
-                {{ formatNumber((activeInventory.gil as number) || 0) }}</span
-              >
-            </div>
-          </div>
+          <div class="filters-row">
+            <div class="filters-left">
+              <label class="filter">
+                <Search :size="16" />
+                <input
+                  v-model="filterTerm"
+                  type="search"
+                  placeholder="Search items"
+                />
+              </label>
 
-          <div class="filters">
-            <label class="filter">
-              <Search :size="16" />
-              <input
-                v-model="filterTerm"
-                type="search"
-                placeholder="Search items"
-              />
-            </label>
-            <label class="filter">
-              <span>Category</span>
-              <select v-model="categoryFilter">
-                <option v-for="c in availableCategories" :key="c" :value="c">
-                  {{ c === "all" ? "All categories" : displayCategory(c) }}
-                </option>
-              </select>
-            </label>
-            <div class="filter page">
-              <span>Per page</span>
-              <select v-model.number="pageSize">
-                <option v-for="size in pageSizes" :key="size" :value="size">
-                  {{ size }}
-                </option>
-              </select>
-              <div class="pager">
-                <button
-                  class="btn ghost"
-                  type="button"
-                  :disabled="currentPage === 1"
-                  @click="currentPage = Math.max(1, currentPage - 1)"
-                >
-                  Prev
-                </button>
-                <span
-                  >Page {{ Math.min(currentPage, totalPages) }} /
-                  {{ totalPages }}</span
-                >
-                <button
-                  class="btn ghost"
-                  type="button"
-                  :disabled="currentPage >= totalPages"
-                  @click="currentPage = Math.min(totalPages, currentPage + 1)"
-                >
-                  Next
-                </button>
-              </div>
+              <label class="filter">
+                <span>Category</span>
+                <select v-model="categoryFilter">
+                  <option v-for="c in availableCategories" :key="c" :value="c">
+                    {{ c === "all" ? "All categories" : displayCategory(c) }}
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            <div class="filters-right">
+              <button
+                class="btn ghost small"
+                @click="exportCSV"
+                title="Export inventory to CSV"
+              >
+                <i class="fa-solid fa-file-csv"></i>
+                Export CSV
+              </button>
+
+              <span class="gil">
+                <i class="fa-solid fa-coins"></i>
+                {{ formatNumber((activeInventory.gil as number) || 0) }}
+              </span>
             </div>
           </div>
 
@@ -645,8 +680,157 @@ async function selectFolderNative() {
               :show-count="!isKeyView"
             />
           </RouterView>
+
+          <div class="table-footer">
+            <div class="pager">
+              <span class="page-size">
+                Rows
+                <select v-model.number="pageSize">
+                  <option v-for="size in pageSizes" :key="size" :value="size">
+                    {{ size }}
+                  </option>
+                </select>
+              </span>
+
+              <button
+                class="btn ghost"
+                :disabled="currentPage === 1"
+                @click="currentPage = Math.max(1, currentPage - 1)"
+              >
+                Prev
+              </button>
+
+              <span>
+                Page {{ Math.min(currentPage, totalPages) }} / {{ totalPages }}
+              </span>
+
+              <button
+                class="btn ghost"
+                :disabled="currentPage >= totalPages"
+                @click="currentPage = Math.min(totalPages, currentPage + 1)"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </main>
   </div>
 </template>
+
+<style scoped>
+.filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.filters-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filters-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gil {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 12px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.item-link,
+.item-link:visited,
+.item-link:hover,
+.item-link:active,
+.item-link:focus {
+  text-decoration: none !important;
+  color: inherit;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  height: 32px;
+  padding: 0 28px 0 10px;
+
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--surface);
+  color: var(--text-primary);
+
+  font: inherit;
+  line-height: 1;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+input[type="search"] {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  font: inherit;
+}
+
+:deep(table) {
+  width: 100%;
+}
+
+:deep(thead),
+:deep(tbody tr) {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+:deep(tbody) {
+  display: block;
+  min-height: 160px;
+}
+
+</style>

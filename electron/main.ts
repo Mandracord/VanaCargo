@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import path from "node:path";
 import fs from "node:fs/promises";
 
@@ -15,7 +15,21 @@ async function createWindow() {
     height: 1080,
     webPreferences: {
       contextIsolation: true,
-      preload: path.join(__dirname, "preload.js")
+      preload: path.join(__dirname, "preload.js"),
+    },
+  });
+
+  // 🔴 CRITICAL PART — FORCE EXTERNAL LINKS TO SYSTEM BROWSER
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: "deny" };
+  });
+
+  // ALSO CATCH IN-APP NAVIGATION ATTEMPTS (safety net)
+  win.webContents.on("will-navigate", (event, url) => {
+    if (!url.startsWith(devServerUrl)) {
+      event.preventDefault();
+      shell.openExternal(url);
     }
   });
 
@@ -32,7 +46,7 @@ async function createWindow() {
 app.whenReady().then(() => {
   ipcMain.handle("select-folder", async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
-      properties: ["openDirectory"]
+      properties: ["openDirectory"],
     });
 
     if (canceled || !filePaths.length) return null;
@@ -42,6 +56,24 @@ app.whenReady().then(() => {
 
     return { root, files };
   });
+
+  ipcMain.handle(
+    "save-file",
+    async (
+      _event,
+      { defaultName, content }: { defaultName: string; content: string }
+    ) => {
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        defaultPath: defaultName,
+        filters: [{ name: "CSV", extensions: ["csv"] }],
+      });
+
+      if (canceled || !filePath) return false;
+
+      await fs.writeFile(filePath, content, "utf-8");
+      return true;
+    }
+  );
 
   createWindow();
 });
@@ -54,7 +86,7 @@ async function gatherFiles(root: string) {
   const targets = [
     "res/items.lua",
     "res/key_items.lua",
-    "res/item_descriptions.lua"
+    "res/item_descriptions.lua",
   ];
 
   const out: Array<{ path: string; content: string }> = [];

@@ -28,17 +28,37 @@ defineProps<{
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="row.group + '-' + row.id">
-          <td class="strong">{{ row.name }}</td>
-          <td v-if="showCount !== false">{{ row.count ?? '—' }}</td>
+          <td>
+            <a
+              :href="`https://bg-wiki.com/ffxi/${encodeURIComponent(row.name)}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="item-link"
+            >
+              {{ row.name }}
+            </a>
+          </td>
+          <td v-if="showCount !== false">{{ row.count ?? "—" }}</td>
           <td class="muted">{{ row.desc }}</td>
           <td>{{ row.group }}</td>
         </tr>
         <tr v-if="rows.length === 0">
           <td :colspan="showCount !== false ? 4 : 3" class="muted center">
-            {{ emptyMessage || 'No items match the current filters.' }}
+            {{ emptyMessage || "No items match the current filters." }}
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 </template>
+
+<style scoped>
+.item-link,
+.item-link:visited,
+.item-link:hover,
+.item-link:active,
+.item-link:focus {
+  text-decoration: none !important;
+  color: inherit;
+}
+</style>

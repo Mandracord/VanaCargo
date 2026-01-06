@@ -15,7 +15,19 @@ async function createWindow() {
         height: 1080,
         webPreferences: {
             contextIsolation: true,
-            preload: node_path_1.default.join(__dirname, "preload.js")
+            preload: node_path_1.default.join(__dirname, "preload.js"),
+        },
+    });
+    // 🔴 CRITICAL PART — FORCE EXTERNAL LINKS TO SYSTEM BROWSER
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        electron_1.shell.openExternal(url);
+        return { action: "deny" };
+    });
+    // ALSO CATCH IN-APP NAVIGATION ATTEMPTS (safety net)
+    win.webContents.on("will-navigate", (event, url) => {
+        if (!url.startsWith(devServerUrl)) {
+            event.preventDefault();
+            electron_1.shell.openExternal(url);
         }
     });
     if (isDev) {
@@ -29,13 +41,23 @@ async function createWindow() {
 electron_1.app.whenReady().then(() => {
     electron_1.ipcMain.handle("select-folder", async () => {
         const { canceled, filePaths } = await electron_1.dialog.showOpenDialog({
-            properties: ["openDirectory"]
+            properties: ["openDirectory"],
         });
         if (canceled || !filePaths.length)
             return null;
         const root = filePaths[0];
         const files = await gatherFiles(root);
         return { root, files };
+    });
+    electron_1.ipcMain.handle("save-file", async (_event, { defaultName, content }) => {
+        const { canceled, filePath } = await electron_1.dialog.showSaveDialog({
+            defaultPath: defaultName,
+            filters: [{ name: "CSV", extensions: ["csv"] }],
+        });
+        if (canceled || !filePath)
+            return false;
+        await promises_1.default.writeFile(filePath, content, "utf-8");
+        return true;
     });
     createWindow();
 });
@@ -47,7 +69,7 @@ async function gatherFiles(root) {
     const targets = [
         "res/items.lua",
         "res/key_items.lua",
-        "res/item_descriptions.lua"
+        "res/item_descriptions.lua",
     ];
     const out = [];
     for (const rel of targets) {
