@@ -1,22 +1,45 @@
-# FFXI Inventory Viewer (Vue + Vite)
+# Vana Cargo
 
-Simple proof-of-concept viewer that parses exported Lua inventory files and maps item IDs to readable names.
+Offline inventory viewer for **Final Fantasy XI**.  
+Desktop application built with **Vue + Electron**, designed to read Windower-exported Lua inventory files and present them in a clean, multi-character UI.
 
-## Getting started
+## Overview
 
-1. Install deps: `npm install`
-2. Run dev server: `npm run dev` (Vite will serve `public/data`).
-3. Visit the printed local URL.
+Vana Cargo is **not a Windower addon** and does not interact with the game client.  
+It operates entirely offline by parsing Lua data files already exported by the addon FindAll.
 
-## Data files
+Each character is loaded into its own tab, allowing quick inspection and comparison of inventories across characters.
 
-- Lua sources are served from `public/data/`. Current seeds:
-  - `items.lua`
-  - `key_items.lua`
-  - `Meliora.lua`
-- To add another character, drop its `name.lua` file into `public/data/` and add an entry to the `characters` array in `src/App.vue`, e.g. `{ name: 'Alt', file: '/data/Alt.lua' }`.
+## Usage
 
-## Notes
+1. Launch the Vana Cargo desktop app
+2. Pick your Windower root folder (where your Windower folder is located, e.g C:\Windower)
+3. Data will load automatically
 
-- The Lua parser is a lightweight regex transform in `src/utils/luaParser.ts`; swap it for a real parser if the data gets more complex.
-- Styling lives in `src/style.css` and the main view in `src/App.vue`.
+No network access or game process is required.
+
+## Inventory Data
+
+Inventory data is read from Lua files containing structured tables.
+
+Expected inputs include:
+- Counts of stackable items
+- Key item tables
+- Per-character inventory snapshot
+
+## Supported Platforms
+
+- Windows (portable executable)
+- Linux (through Wine)
+
+## Technical Notes
+
+- Application: Vue (TypeScript) application
+- Desktop shell: Electron
+- Lua parsing is intentionally lightweight and tailored to known Windower export formats
+- The app is read-only by design and will never modify game data or files
+
+## License
+
+MIT
+
