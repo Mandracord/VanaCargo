@@ -19,13 +19,11 @@ async function createWindow() {
     },
   });
 
-  // 🔴 CRITICAL PART — FORCE EXTERNAL LINKS TO SYSTEM BROWSER
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: "deny" };
   });
 
-  // ALSO CATCH IN-APP NAVIGATION ATTEMPTS (safety net)
   win.webContents.on("will-navigate", (event, url) => {
     if (!url.startsWith(devServerUrl)) {
       event.preventDefault();
