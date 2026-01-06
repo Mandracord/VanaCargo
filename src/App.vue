@@ -7,10 +7,13 @@ import { luaToJson } from "./utils/luaParser";
 declare global {
   interface Window {
     electronAPI?: {
-      selectFolder: () => Promise<{
-        root: string;
-        files: Array<{ path: string; content: string }>;
-      }>;
+      selectFolder: () => Promise<
+        | {
+            root: string;
+            files: Array<{ path: string; content: string }>;
+          }
+        | null
+      >;
     };
   }
 }
@@ -28,11 +31,7 @@ type Row = {
   desc?: string;
 };
 
-const characters = ref<Array<{ name: string; file: string }>>([
-  { name: "Meliora", file: "data/Meliora.lua" },
-]);
-
-const base = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "/");
+const characters = ref<Array<{ name: string; file: string }>>([]);
 
 const loading = ref(true);
 const error = ref("");
@@ -40,7 +39,7 @@ const items = ref<Record<string, Item>>({});
 const keyItems = ref<Record<string, KeyItem>>({});
 const inventories = ref<Record<string, Inventory>>({});
 const descriptions = ref<Record<string, Description>>({});
-const activeName = ref(characters.value[0]?.name ?? "");
+const activeName = ref("");
 const cachedLoaded = ref(false);
 
 const filterTerm = ref("");
@@ -291,35 +290,12 @@ async function loadData() {
     if (folderFiles.value.length) {
       await loadFromFolder();
     } else {
-      if (!rootPath.value) {
-        if (cachedLoaded.value) {
-          error.value = "";
-          return;
-        }
-        error.value = "Select your Windower folder to load data.";
+      if (cachedLoaded.value) {
+        error.value = "";
         return;
       }
-      const [itemData, keyItemData, descData] = await Promise.all([
-        fetchLua(pathJoin(rootPath.value, "res/items.lua")),
-        fetchLua(pathJoin(rootPath.value, "res/key_items.lua")),
-        fetchLuaSafe(pathJoin(rootPath.value, "res/item_descriptions.lua")),
-      ]);
-      items.value = itemData;
-      keyItems.value = keyItemData;
-      descriptions.value = descData;
-
-      if (!characters.value.length) {
-        error.value = "FindAll addon missing or no character files found.";
-        return;
-      }
-      for (const character of characters.value) {
-        inventories.value[character.name] = await fetchLua(
-          pathJoin(rootPath.value, character.file)
-        );
-      }
-      localStorage.setItem("rootPath", rootPath.value);
-      localStorage.setItem("characters", JSON.stringify(characters.value));
-      error.value = "";
+      error.value = "Select your Windower folder to load data.";
+      return;
     }
     localStorage.setItem(
       "cacheData",
@@ -337,26 +313,6 @@ async function loadData() {
       "Unable to load Lua data. Ensure the Windower root is set and files exist.";
   } finally {
     loading.value = false;
-  }
-}
-
-async function fetchLua(path: string) {
-  const url = new URL(
-    path.replace(/^\/+/, ""),
-    window.location.origin + base
-  ).toString();
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
-  const text = await res.text();
-  return luaToJson(text);
-}
-
-async function fetchLuaSafe(path: string) {
-  try {
-    return await fetchLua(path);
-  } catch (err) {
-    console.warn(`Failed to parse ${path}; continuing with empty object`, err);
-    return {};
   }
 }
 
@@ -399,12 +355,6 @@ function storageOrder(name: string) {
   const s = name.match(/^slip\s*(\d*)$/i);
   if (s) return { key: "slip", num: Number(s[1] || 0) };
   return { key: name.toLowerCase(), num: 0 };
-}
-
-function pathJoin(root: string, relative: string) {
-  const cleanedRoot = root.replace(/[/\\]+$/, "");
-  const cleanedRel = relative.replace(/^[/\\]+/, "");
-  return `${cleanedRoot}/${cleanedRel}`;
 }
 
 function normalizePath(p: string) {
@@ -495,6 +445,7 @@ async function selectFolderNative() {
   }
   try {
     const result = await window.electronAPI.selectFolder();
+    if (!result) return;
     rootPath.value = result.root;
     folderFiles.value = result.files.map((f) => {
       const rel = normalizePath(f.path);

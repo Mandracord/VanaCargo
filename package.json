@@ -1,12 +1,23 @@
 {
-  "name": "inventory-frontend",
+  "name": "vana-cargo",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Vana Cargo - Offline FFXI inventory viewer with Lua parsing and multi-character tabs.",
+  "author": {
+    "name": "Mandracord Team",
+    "email": "dev@mandracord.local"
+  },
+  "homepage": "https://github.com/Mandracord/VanaCargo",
+  "license": "MIT",
+  "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"vite\" \"npm:electron:start\"",
+    "electron:start": "wait-on http://localhost:5173 && tsc -p tsconfig.electron.json && electron .",
+    "electron:build": "npm run build && tsc -p tsconfig.electron.json && electron-builder"
   },
   "dependencies": {
     "lucide-vue-next": "^0.562.0",
@@ -19,10 +30,47 @@
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "electron": "^32.1.2",
+    "electron-builder": "^24.13.3",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "typescript": "~5.9.3",
     "vite": "^7.2.4",
+    "wait-on": "^7.2.0",
     "vue-tsc": "^3.1.4"
+  },
+  "build": {
+    "appId": "com.vanacargo.app",
+    "productName": "Vana Cargo",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**",
+      "package.json"
+    ],
+    "icon": "build/appicon.png",
+    "extraResources": [],
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "build/appicon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "icon": "build/appicon.png",
+      "maintainer": "Mandracord Team <dev@mandracord.local>",
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ]
+    }
   }
 }
