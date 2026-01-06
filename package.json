@@ -2,75 +2,52 @@
   "name": "vana-cargo",
   "private": true,
   "version": "1.0.0",
-  "description": "Vana Cargo - Offline FFXI inventory viewer with Lua parsing and multi-character tabs.",
-  "author": {
-    "name": "Mandracord Team",
-    "email": "dev@mandracord.local"
-  },
-  "homepage": "https://github.com/Mandracord/VanaCargo",
+  "description": "Vana Cargo - Offline FFXI inventory viewer",
+  "author": "Mandracord Team",
   "license": "MIT",
-  "main": "dist-electron/main.js",
-  "type": "module",
+
+  "main": "electron/main.js",
+
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview",
+    "build": "vite build",
     "electron:dev": "concurrently \"vite\" \"npm:electron:start\"",
-    "electron:start": "wait-on http://localhost:5173 && tsc -p tsconfig.electron.json && electron .",
-    "electron:build": "npm run build && tsc -p tsconfig.electron.json && electron-builder"
+    "electron:start": "wait-on http://localhost:5173 && electron .",
+    "electron:build": "vite build && tsc -p tsconfig.electron.json && electron-builder"
   },
+
   "dependencies": {
-    "lucide-vue-next": "^0.562.0",
     "vue": "^3.5.24",
     "vue-router": "^4.6.4"
   },
+
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "^24.10.1",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vue/tsconfig": "^0.8.1",
-    "autoprefixer": "^10.4.20",
-    "concurrently": "^8.2.2",
     "electron": "^32.1.2",
     "electron-builder": "^24.13.3",
-    "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.14",
     "typescript": "~5.9.3",
     "vite": "^7.2.4",
+    "@vitejs/plugin-vue": "^6.0.1",
     "wait-on": "^7.2.0",
-    "vue-tsc": "^3.1.4"
+    "concurrently": "^8.2.2"
   },
+
   "build": {
     "appId": "com.vanacargo.app",
     "productName": "Vana Cargo",
+    "asar": true,
     "directories": {
       "output": "dist-electron"
     },
     "files": [
       "dist/**",
-      "dist-electron/**",
+      "electron/**",
       "package.json"
     ],
-    "icon": "build/appicon.png",
-    "extraResources": [],
-    "mac": {
-      "category": "public.app-category.utilities"
-    },
     "win": {
-      "icon": "build/appicon.ico",
-      "target": [
-        "nsis",
-        "portable"
-      ]
+      "target": ["portable"]
     },
     "linux": {
-      "icon": "build/appicon.png",
-      "maintainer": "Mandracord Team <dev@mandracord.local>",
-      "target": [
-        "AppImage",
-        "deb",
-        "rpm"
-      ]
+      "target": ["AppImage", "deb", "rpm"]
     }
   }
 }
