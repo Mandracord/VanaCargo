@@ -1,0 +1,148 @@
+<Window x:Class="VanaCargoApp.SearchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:VanaCargoApp"
+        Title="Search"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppForegroundBrush}"
+        Width="960"
+        Height="600"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <local:IconConverter x:Key="IconConverter" />
+    </Window.Resources>
+
+    <DockPanel Margin="10">
+
+        <!-- Search bar -->
+        <StackPanel DockPanel.Dock="Top"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,8">
+
+            <Label Content="Search:"
+                   VerticalAlignment="Center" />
+
+            <TextBox Name="SearchBox"
+                     Width="240"
+                     Margin="4,0,0,0" />
+
+            <CheckBox Name="AllCharactersCheck"
+                      Content="Search all characters"
+                      Margin="12,0,0,0"
+                      VerticalAlignment="Center" />
+
+            <Button Name="SearchButton"
+                    Content="Search"
+                    Margin="12,0,0,0"
+                    Width="90"
+                    Click="OnSearchClick" />
+
+            <Button Name="CancelButton"
+                    Content="Cancel"
+                    Margin="8,0,0,0"
+                    Width="90"
+                    Click="OnCancelClick"
+                    IsEnabled="False" />
+
+            <TextBlock Name="StatusText"
+                       Margin="12,0,0,0"
+                       VerticalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Results grid -->
+        <DataGrid Name="ResultsGrid"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  ColumnWidth="SizeToHeader"
+                  MouseDoubleClick="OnResultDoubleClick">
+
+            <!-- Cell spacing -->
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Padding" Value="6,0,6,0"/>
+                </Style>
+            </DataGrid.CellStyle>
+
+            <DataGrid.Columns>
+
+                <!-- Icon -->
+                <DataGridTemplateColumn Width="28">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Width="16"
+                                   Height="16"
+                                   Margin="2,0,2,0"
+                                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                   SnapsToDevicePixels="True">
+                                <Image.Source>
+                                    <MultiBinding Converter="{StaticResource IconConverter}">
+                                        <Binding Path="Item.IconPixels" />
+                                        <Binding Path="Item.IconWidth" />
+                                        <Binding Path="Item.IconHeight" />
+                                        <Binding Path="Item.IconStride" />
+                                    </MultiBinding>
+                                </Image.Source>
+                            </Image>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Character"
+                                    Width="120"
+                                    Binding="{Binding Character}" />
+
+                <DataGridTextColumn Header="Location"
+                                    Width="120"
+                                    Binding="{Binding Location}" />
+
+                <DataGridTextColumn Header="Count"
+                                    Width="60"
+                                    Binding="{Binding Item.Count}" />
+
+                <DataGridTextColumn Header="Name"
+                                    Width="180"
+                                    Binding="{Binding Item.Name}" />
+
+                <!-- Main expanding column -->
+                <DataGridTextColumn Header="Description"
+                                    Width="*"
+                                    Binding="{Binding Item.Description}" />
+
+                <DataGridTextColumn Header="Attr"
+                                    Width="70"
+                                    Binding="{Binding Item.Attr}" />
+
+                <DataGridTextColumn Header="Type"
+                                    Width="80"
+                                    Binding="{Binding Item.Slot}" />
+
+                <DataGridTextColumn Header="Races"
+                                    Width="90"
+                                    Binding="{Binding Item.Races}" />
+
+                <DataGridTextColumn Header="Level"
+                                    Width="70"
+                                    Binding="{Binding Item.Level}" />
+
+                <DataGridTextColumn Header="Jobs"
+                                    Width="120"
+                                    Binding="{Binding Item.Jobs}" />
+
+                <DataGridTextColumn Header="Remarks"
+                                    Width="140"
+                                    Binding="{Binding Item.Remarks}" />
+
+                <DataGridTextColumn Header="Avg FFXIAH Price"
+                                    Width="140"
+                                    Binding="{Binding Item.Median}" />
+
+                <DataGridTextColumn Header="Last FFXIAH Sale"
+                                    Width="140"
+                                    Binding="{Binding Item.LastSale}" />
+
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>

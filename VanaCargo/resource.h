@@ -1,0 +1,113 @@
+//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ generated include file.
+// Used by VanaCargo.rc
+//
+#define IDD_LOOTBOX_DIALOG              100
+#define IDD_REGION_SELECT               101
+#define IDD_PROGRESS                    102
+#define IDD_SERVER_SELECT               164
+#define IDD_ABOUTBOX                    165
+#define IDR_MAINFRAME                   150
+#define IDI_PLAYONLINE                  151
+#define IDI_LOOTBOX                     152
+#define IDR_MAIN_MENU                   153
+#define IDD_DIALOG1                     155
+#define IDD_SEARCH_DIALOG               155
+#define IDI_SEARCH                      158
+#define IDR_POP_INVTAB                  159
+#define IDR_ACCELERATOR_SEARCH          161
+#define IDD_EXPORT                      162
+#define IDR_ACCELERATOR_EXPORT          163
+#define IDC_CHAR_LIST                   1000
+#define IDC_INVENTORY_TABS              1001
+#define IDC_CHARACTERS_LABEL            1002
+#define IDC_INVENTORY_LIST              1003
+#define IDC_STATUS_BAR                  1004
+#define IDC_EXPORT_NAME                 1004
+#define IDC_REGION_LABEL                1005
+#define IDC_EXPORT_ATTR                 1005
+#define IDC_REGION_COMBO                1006
+#define IDC_EXPORT_LIST                 1006
+#define IDC_ITEM_COUNT                  1007
+#define IDC_EXPORT_DESC                 1007
+#define IDC_PROGRESS                    1008
+#define IDC_EXPORT_TYPE                 1008
+#define IDC_LIST_JOBS                   1009
+#define IDC_EXPORT_RACES                1009
+#define IDC_LIST_SLOTS                  1010
+#define IDC_EXPORT_LEVEL                1010
+#define IDC_LIST_SKILLS                 1011
+#define IDC_EXPORT_JOBS                 1011
+#define IDC_SEARCH_TERM                 1012
+#define IDC_EXPORT_REMARKS              1012
+#define IDC_STATIC_SEARCH               1013
+#define IDC_CHECK_RARE                  1014
+#define IDC_CHECK_EX                    1015
+#define IDC_CHECK_STABKABLE             1016
+#define IDC_STATIC_LEVEL                1017
+#define IDC_MIN_LEVEL                   1018
+#define IDC_STATIC_SEP                  1019
+#define IDC_MAX_LEVEL                   1020
+#define IDC_STATIC_DMG                  1021
+#define IDC_MIN_DMG                     1022
+#define IDC_STATIC_SEP2                 1023
+#define IDC_MAX_DMG                     1024
+#define IDC_STATIC_DEF                  1025
+#define IDC_MIN_DEF                     1026
+#define IDC_STATIC_SEP3                 1027
+#define IDC_MAX_DEF                     1028
+#define IDC_STATIC_DELAY                1029
+#define IDC_MIN_DELAY                   1030
+#define IDC_STATIC_SEP4                 1031
+#define IDC_MAX_DELAY                   1032
+#define IDC_LIST_RACES                  1033
+#define IDC_SERVER_COMBO                1034
+#define IDC_EXPORT_BG_URL               1021
+#define IDC_EXPORT_MEDIAN               1022
+#define IDC_PROGRESS_LABEL              1023
+#define IDC_ABOUT_TEXT                  1035
+#define IDC_ABOUT_ICON                  1036
+#define IDC_FETCH_FFXIAH                1037
+#define ID_FILE                         32771
+#define ID_CONFIG                       32772
+#define ID_CONFIG_LANGUAGE              32773
+#define ID_LANGUAGE_JAPANESE            32774
+#define ID_LANGUAGE_ENGLISH             32775
+#define ID_LANGUAGE_FRENCH              32776
+#define ID_LANGUAGE_GERMAN              32777
+#define ID_VIEW_COMPACTLISTING          32778
+#define ID_FILE_SEARCH                  32779
+#define ID_REFRESH_CLOSE                32782
+#define ID_POP_REFRESH                  32783
+#define ID_ACCELERATOR32784             32784
+#define ID_FILE_EXPORT                  32786
+#define ID_EXPORT                       32787
+#define ID_SERVER_BAHAMUT               32790
+#define ID_SERVER_SHIVA                 32791
+#define ID_SERVER_PHOENIX               32792
+#define ID_SERVER_CARBUNCLE             32793
+#define ID_SERVER_FENRIR                32794
+#define ID_SERVER_SYLPH                 32795
+#define ID_SERVER_VALEFOR               32796
+#define ID_SERVER_LEVIATHAN             32797
+#define ID_SERVER_ODIN                  32798
+#define ID_SERVER_QUETZALCOATL          32799
+#define ID_SERVER_SIREN                 32800
+#define ID_SERVER_RAGNAROK              32801
+#define ID_SERVER_CERBERUS              32802
+#define ID_SERVER_BISMARCK              32803
+#define ID_SERVER_LAKSHMI               32804
+#define ID_SERVER_ASURA                 32805
+#define ID_FILE_QUIT                    32806
+#define ID_HELP_ABOUT                   32807
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        166
+#define _APS_NEXT_COMMAND_VALUE         32808
+#define _APS_NEXT_CONTROL_VALUE         1038
+#define _APS_NEXT_SYMED_VALUE           103
+#endif
+#endif

@@ -1,0 +1,56 @@
+<Window x:Class="VanaCargoApp.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About VanaCargo"
+        Width="480"
+        Height="260"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppForegroundBrush}">
+
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="VanaCargo"
+                       FontSize="18"
+                       FontWeight="Bold"/>
+
+            <StackPanel Grid.Row="1"
+                        Margin="0,8,0,8">
+
+                <TextBlock Text="Forked from LootBox by Teo Twawki (MIT License)."/>
+
+                <TextBlock>
+                    <Run Text="Source: "/>
+                    <Hyperlink Click="OnSourceClick">
+                        <Run Text="{Binding SourceUrl, Mode=OneWay}" Foreground="#FF3B8FFF"/>
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,10,0,0"
+                           Text="{Binding CopyrightOriginal, Mode=OneWay}"/>
+
+                <TextBlock Text="{Binding CopyrightCurrent, Mode=OneWay}"/>
+            </StackPanel>
+
+            <Button Grid.Row="2"
+                    Content="OK"
+                    Width="80"
+                    HorizontalAlignment="Right"
+                    Click="OnClose"/>
+        </Grid>
+    </Grid>
+</Window>

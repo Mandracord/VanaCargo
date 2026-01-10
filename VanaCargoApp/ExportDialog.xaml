@@ -1,0 +1,55 @@
+<Window x:Class="VanaCargoApp.ExportDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Export"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppForegroundBrush}"
+        Width="620"
+        Height="480"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <GroupBox Header="Exported characters" Grid.Column="0" Margin="0,0,8,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ListBox Name="CharactersList" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </ScrollViewer>
+        </GroupBox>
+
+        <GroupBox Header="Exported data" Grid.Column="1" Margin="8,0,0,0">
+            <DockPanel>
+                <CheckBox Name="FetchMissingCheck" Margin="0,8,0,0" DockPanel.Dock="Bottom">
+                    <TextBlock Text="Fetch missing FFXIAH prices during export" TextWrapping="Wrap" />
+                </CheckBox>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl Name="ColumnsList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </GroupBox>
+
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="OK" Width="90" Margin="0,0,8,0" IsDefault="True" Click="OnOk" />
+            <Button Content="Cancel" Width="90" IsCancel="True" />
+        </StackPanel>
+    </Grid>
+</Window>

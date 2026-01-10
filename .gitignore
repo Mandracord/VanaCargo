@@ -1,0 +1,19 @@
+# Visual Studio
+.vs/
+*.user
+*.pfx
+
+# Build output
+bin/
+obj/
+_Debug/
+_Release/
+app.publish/
+
+# Binaries
+*.exe
+*.dll
+*.pdb
+*.application
+*.manifest
+*.zip

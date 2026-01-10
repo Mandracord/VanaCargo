@@ -1,0 +1,25 @@
+<Window x:Class="VanaCargoApp.ServerSelectWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select Server"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppForegroundBrush}"
+        Width="360"
+        Height="160"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <Label Content="Server:" VerticalAlignment="Center" />
+            <ComboBox Name="ServerCombo" Width="268" Margin="8,0,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="OK" Width="90" Margin="0,0,8,0" IsDefault="True" Click="OnOk" />
+            <Button Content="Cancel" Width="90" IsCancel="True" />
+        </StackPanel>
+    </Grid>
+</Window>

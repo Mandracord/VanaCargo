@@ -1,0 +1,370 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SEARCH_DIALOG DIALOGEX 0, 0, 413, 207
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_LIST_JOBS,"SysListView32",LVS_LIST | LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,32,193
+    CONTROL         "",IDC_LIST_SLOTS,"SysListView32",LVS_LIST | LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,41,7,32,193
+    CONTROL         "",IDC_LIST_SKILLS,"SysListView32",LVS_LIST | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,75,7,80,193
+    CONTROL         "",IDC_LIST_RACES,"SysListView32",LVS_LIST | LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,157,7,79,193
+    EDITTEXT        IDC_MIN_LEVEL,301,50,29,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_LEVEL,346,50,29,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MIN_DMG,301,73,29,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_DMG,346,73,29,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MIN_DEF,301,95,29,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_DEF,346,95,29,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MIN_DELAY,301,116,29,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAX_DELAY,346,116,29,12,ES_AUTOHSCROLL
+    CONTROL         "Rare",IDC_CHECK_RARE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,262,136,31,12
+    CONTROL         "Exclusive",IDC_CHECK_EX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,262,156,41,12
+    DEFPUSHBUTTON   "OK",IDOK,267,178,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,324,178,50,14
+    LTEXT           "Search:",IDC_STATIC_SEARCH,254,15,24,9
+    LTEXT           "Level",IDC_STATIC_LEVEL,262,52,36,9
+    CTEXT           "-",IDC_STATIC_SEP,334,52,8,8
+    LTEXT           "Damage",IDC_STATIC_DMG,262,75,36,9
+    CTEXT           "-",IDC_STATIC_SEP2,334,75,8,8
+    LTEXT           "Defense",IDC_STATIC_DEF,262,96,36,9
+    CTEXT           "-",IDC_STATIC_SEP3,334,96,8,8
+    LTEXT           "Delay",IDC_STATIC_DELAY,262,118,36,9
+    CTEXT           "-",IDC_STATIC_SEP4,334,118,8,8
+    EDITTEXT        IDC_SEARCH_TERM,252,26,148,12,ES_AUTOHSCROLL
+END
+
+IDD_LOOTBOX_DIALOG DIALOGEX 0, 0, 600, 400
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "VanaCargo"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_STATUS_BAR,"Static",WS_GROUP | 0x20,7,366,470,8
+    CONTROL         "Characters",IDC_CHARACTERS_LABEL,"Static",WS_GROUP | 0x20,7,2,98,8
+    CONTROL         "",IDC_INVENTORY_TABS,"SysTabControl32",0x0,108,2,459,363,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_CHAR_LIST,"SysListView32",LVS_SMALLICON | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | LVS_EDITLABELS | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,7,12,98,353
+    CONTROL         "",IDC_INVENTORY_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_ALIGNLEFT | WS_TABSTOP,109,15,456,348
+    PUSHBUTTON      "Load FFXIAH Prices",IDC_FETCH_FFXIAH,445,2,120,14
+    RTEXT           "",IDC_ITEM_COUNT,478,366,89,8
+END
+
+IDD_REGION_SELECT DIALOGEX 0, 0, 186, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,33,41,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,102,41,50,14
+    LTEXT           "Final Fantasy XI region:",IDC_REGION_LABEL,7,7,172,8
+    COMBOBOX        IDC_REGION_COMBO,19,21,146,51,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_SERVER_SELECT DIALOGEX 0, 0, 220, 70
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Server"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,47,45,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,123,45,50,14
+    LTEXT           "FFXIAH server:",IDC_STATIC,7,7,80,8
+    COMBOBOX        IDC_SERVER_COMBO,17,21,186,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 250, 110
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About VanaCargo"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,188,89,50,14
+    CONTROL         "",IDC_ABOUT_ICON,"Static",SS_ICON,7,7,32,32
+    LTEXT           "About VanaCargo",IDC_ABOUT_TEXT,46,7,197,70
+END
+
+IDD_PROGRESS DIALOGEX 0, 0, 332, 40
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE
+EXSTYLE WS_EX_WINDOWEDGE
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Fetching...",IDC_PROGRESS_LABEL,7,7,250,8
+    CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH,7,18,250,16
+    PUSHBUTTON      "Cancel",IDCANCEL,265,18,60,14
+END
+
+IDD_EXPORT DIALOGEX 0, 0, 275, 204
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Export"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,166,183,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,218,183,50,14
+    CONTROL         "",IDC_EXPORT_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,7,23,261,98
+    LTEXT           "Exported characters :",IDC_STATIC,7,10,71,8
+    CONTROL         "Name",IDC_EXPORT_NAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,138,50,10
+    LTEXT           "Exported data :",IDC_STATIC,7,126,52,8
+    CONTROL         "Attributes",IDC_EXPORT_ATTR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,95,138,50,10
+    CONTROL         "Description",IDC_EXPORT_DESC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,138,50,10
+    CONTROL         "Type",IDC_EXPORT_TYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,138,50,10
+    CONTROL         "Races",IDC_EXPORT_RACES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,151,50,10
+    CONTROL         "Level",IDC_EXPORT_LEVEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,95,151,50,10
+    CONTROL         "Jobs",IDC_EXPORT_JOBS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,151,50,10
+    CONTROL         "Remarks",IDC_EXPORT_REMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,151,50,10
+    CONTROL         "BG Wiki URL",IDC_EXPORT_BG_URL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,164,80,10
+    CONTROL         "Avg FFXIAH Price",IDC_EXPORT_MEDIAN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,164,90,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_SEARCH_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 406
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 200
+    END
+
+    IDD_REGION_SELECT, DIALOG
+    BEGIN
+    END
+
+    IDD_EXPORT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 268
+        VERTGUIDE, 45
+        VERTGUIDE, 95
+        VERTGUIDE, 145
+        VERTGUIDE, 195
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 197
+        HORZGUIDE, 138
+        HORZGUIDE, 151
+        HORZGUIDE, 164
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)\r\n"
+    "LANGUAGE 12, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\VanaCargo.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "FileDescription", "VanaCargo"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "VanaCargo.exe"
+            VALUE "OriginalFilename", "VanaCargo.exe"
+            VALUE "ProductName", "VanaCargo"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\favicon.ico"
+IDI_PLAYONLINE          ICON                    "res\\pol16alpha.ico"
+IDI_LOOTBOX             ICON                    "res\\safe16alpha.ico"
+IDI_SEARCH              ICON                    "res\\search32alpha.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAIN_MENU MENU
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "Search\tCtrl+F",              ID_FILE_SEARCH
+        MENUITEM "Export\tCtrl+E",              ID_FILE_EXPORT
+        MENUITEM "Quit\tAlt+F4",                ID_FILE_QUIT
+    END
+    POPUP "Config"
+    BEGIN
+        POPUP "Language"
+        BEGIN
+            MENUITEM "Japanese",                    ID_LANGUAGE_JAPANESE
+            MENUITEM "English",                     ID_LANGUAGE_ENGLISH
+            MENUITEM "French",                      ID_LANGUAGE_FRENCH
+            MENUITEM "German",                      ID_LANGUAGE_GERMAN
+        END
+        POPUP "Server"
+        BEGIN
+            MENUITEM "Bahamut",                     ID_SERVER_BAHAMUT
+            MENUITEM "Shiva",                       ID_SERVER_SHIVA
+            MENUITEM "Phoenix",                     ID_SERVER_PHOENIX
+            MENUITEM "Carbuncle",                   ID_SERVER_CARBUNCLE
+            MENUITEM "Fenrir",                      ID_SERVER_FENRIR
+            MENUITEM "Sylph",                       ID_SERVER_SYLPH
+            MENUITEM "Valefor",                     ID_SERVER_VALEFOR
+            MENUITEM "Leviathan",                   ID_SERVER_LEVIATHAN
+            MENUITEM "Odin",                        ID_SERVER_ODIN
+            MENUITEM "Quetzalcoatl",                ID_SERVER_QUETZALCOATL
+            MENUITEM "Siren",                       ID_SERVER_SIREN
+            MENUITEM "Ragnarok",                    ID_SERVER_RAGNAROK
+            MENUITEM "Cerberus",                    ID_SERVER_CERBERUS
+            MENUITEM "Bismarck",                    ID_SERVER_BISMARCK
+            MENUITEM "Lakshmi",                     ID_SERVER_LAKSHMI
+            MENUITEM "Asura",                       ID_SERVER_ASURA
+        END
+    END
+    POPUP "View"
+    BEGIN
+        MENUITEM "Compact Listing",             ID_VIEW_COMPACTLISTING
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "About VanaCargo\tF1",         ID_HELP_ABOUT
+    END
+  END
+
+IDR_POP_INVTAB MENU
+BEGIN
+    POPUP "Pop"
+    BEGIN
+        MENUITEM "&Refresh",                    ID_POP_REFRESH
+        MENUITEM "&Close",                      ID_REFRESH_CLOSE
+    END
+END
+
+IDR_ACCELERATOR_SEARCH ACCELERATORS
+BEGIN
+    "F",            ID_FILE_SEARCH,         VIRTKEY, CONTROL, NOINVERT
+    "E",            ID_FILE_EXPORT,         VIRTKEY, CONTROL, NOINVERT
+    "F1",           ID_HELP_ABOUT,          VIRTKEY, NOINVERT
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+LANGUAGE 12, 1
+#pragma code_page(1252)
+#include "res\VanaCargo.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED

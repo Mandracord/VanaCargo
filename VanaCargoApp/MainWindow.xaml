@@ -1,0 +1,175 @@
+<Window x:Class="VanaCargoApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="VanaCargo"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppForegroundBrush}"
+        Width="1920"
+        Height="1080"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Loaded="OnLoaded"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True">
+
+    <Window.Resources>
+        <BitmapImage x:Key="CharacterIcon"
+                     UriSource="/Assets/user16.png"
+                     CacheOption="OnLoad"/>
+        <BitmapImage x:Key="SearchIcon"
+                     UriSource="/Assets/search16.png"
+                     CacheOption="OnLoad"/>
+        <BitmapImage x:Key="FetchIcon"
+                     UriSource="/Assets/download16.png"
+                     CacheOption="OnLoad"/>
+    </Window.Resources>
+
+    <DockPanel>
+
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="_Export..." Click="OnExport" />
+                <Separator />
+                <MenuItem Header="Quit" Click="OnQuit" />
+            </MenuItem>
+
+            <MenuItem Header="Config">
+                <MenuItem Header="Settings" Click="OnOpenConfig" />
+            </MenuItem>
+
+            <MenuItem Header="View">
+                <MenuItem Name="DarkModeMenu"
+                          Header="_Dark Mode"
+                          IsCheckable="True"
+                          Click="OnDarkModeToggle" />
+            </MenuItem>
+
+            <MenuItem Header="Help">
+                <MenuItem Header="About VanaCargo..."
+                       Click="OnAboutClick" />
+            </MenuItem>
+        </Menu>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Header="Select Character" Margin="8">
+                <ListBox Name="CharactersList"
+                         SelectionChanged="OnCharacterSelected">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="4,2"
+                                  SnapsToDevicePixels="True"
+                                  UseLayoutRounding="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Rectangle Grid.Column="0"
+                                           Width="16"
+                                           Height="16"
+                                           Fill="{DynamicResource ControlForegroundBrush}">
+                                    <Rectangle.OpacityMask>
+                                        <ImageBrush ImageSource="{StaticResource CharacterIcon}"
+                                                    Stretch="Uniform"/>
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Name}"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </GroupBox>
+
+            <DockPanel Grid.Column="1" Margin="8">
+
+                <ToolBarTray DockPanel.Dock="Top" IsLocked="True">
+                    <ToolBar>
+                        <StackPanel Orientation="Horizontal">
+
+                            <Button Name="OpenSearchButton"
+        Click="OnOpenSearch"
+        Padding="10,4"
+        Margin="0,0,6,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle Width="16"
+                   Height="16"
+                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
+                                        <Rectangle.OpacityMask>
+                                            <ImageBrush ImageSource="{StaticResource SearchIcon}"
+                            Stretch="Uniform"/>
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+                                    <TextBlock Text="Search"
+                   Margin="6,0,0,0"
+                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                </StackPanel>
+                            </Button>
+
+
+                            <Button Name="FetchPricesButton"
+                                    Click="OnFetchPrices"
+                                    IsEnabled="False"
+                                    Padding="10,4"
+                                    Margin="0,0,12,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle Width="16"
+                                               Height="16"
+                                               Fill="{DynamicResource ControlForegroundBrush}">
+                                        <Rectangle.OpacityMask>
+                                            <ImageBrush ImageSource="{StaticResource FetchIcon}"
+                                                        Stretch="Uniform"/>
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+                                    <TextBlock Text="Load FFXIAH Prices"
+                                               Margin="6,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Name="CancelFetchButton"
+                                    Content="Cancel"
+                                    Visibility="Collapsed"
+                                    Padding="10,4"
+                                    Click="OnCancelFetch"/>
+
+                        </StackPanel>
+                    </ToolBar>
+                </ToolBarTray>
+
+                <Border DockPanel.Dock="Bottom"
+                        Height="26"
+                        Background="{DynamicResource PanelBackgroundBrush}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                        BorderThickness="1,0,0,0"
+                        Padding="8,0">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar Name="StatusProgress"
+                                     Grid.Column="0"
+                                     Width="160"
+                                     Height="12"
+                                     Margin="0,0,8,0"
+                                     Visibility="Collapsed"/>
+                        <TextBlock Name="StatusText"
+                                   Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Text="Ready"/>
+                    </Grid>
+                </Border>
+
+                <TabControl Name="InventoryTabs" />
+
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>
