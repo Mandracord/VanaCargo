@@ -31,11 +31,7 @@
         </GroupBox>
 
         <GroupBox Header="Exported data" Grid.Column="1" Margin="8,0,0,0">
-            <DockPanel>
-                <CheckBox Name="FetchMissingCheck" Margin="0,8,0,0" DockPanel.Dock="Bottom">
-                    <TextBlock Text="Fetch missing FFXIAH prices during export" TextWrapping="Wrap" />
-                </CheckBox>
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <ItemsControl Name="ColumnsList">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -44,7 +40,6 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
-            </DockPanel>
         </GroupBox>
 
         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">

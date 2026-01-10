@@ -9,8 +9,6 @@ struct CoreSettings
 	int Language;
 	bool CompactList;
 	std::wstring FfxiPath;
-	std::wstring FfxiahServer;
-	bool FfxiahCacheTtlEnabled;
 	bool FindAllEnabled;
 	std::wstring FindAllDataPath;
 	std::wstring FindAllKeyItemsPath;
@@ -40,8 +38,6 @@ struct CoreItem
 	std::wstring Level;
 	std::wstring Jobs;
 	std::wstring Remarks;
-	std::wstring Median;
-	std::wstring LastSale;
 	int IconWidth;
 	int IconHeight;
 	int IconStride;
@@ -68,24 +64,6 @@ public:
 		std::vector<InventoryTab> &outTabs);
 
 	bool SaveSettings(const std::wstring &configPath, const CoreSettings &settings);
-	bool LoadFfxiahCache(const std::wstring &configPath,
-		const std::wstring &server,
-		std::vector<std::pair<int, std::wstring>> &outEntries);
-	bool SaveFfxiahCache(const std::wstring &configPath,
-		const std::wstring &server,
-		const std::vector<std::pair<int, std::wstring>> &entries);
-	bool LoadFfxiahLastSaleCache(const std::wstring &configPath,
-		const std::wstring &server,
-		std::vector<std::pair<int, std::wstring>> &outEntries);
-	bool SaveFfxiahLastSaleCache(const std::wstring &configPath,
-		const std::wstring &server,
-		const std::vector<std::pair<int, std::wstring>> &entries);
-	bool LoadFfxiahCacheTimes(const std::wstring &configPath,
-		const std::wstring &server,
-		std::vector<std::pair<int, long long>> &outEntries);
-	bool SaveFfxiahCacheTimes(const std::wstring &configPath,
-		const std::wstring &server,
-		const std::vector<std::pair<int, long long>> &entries);
 	bool SaveCharacterDisplayNames(const std::wstring &configPath,
 		const std::vector<std::pair<std::wstring, std::wstring>> &entries);
 };

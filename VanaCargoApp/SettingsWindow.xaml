@@ -17,24 +17,7 @@
 
         <GroupBox Header="">
             <StackPanel Margin="8">
-                <Grid Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Server"
-                               VerticalAlignment="Center"
-                               Margin="0,0,8,0" />
-                    <ComboBox Name="ServerCombo"
-                              Grid.Column="1"
-                              IsEditable="True"
-                              IsTextSearchEnabled="False" Margin="25,0,274,0" />
-                </Grid>
-                <CheckBox Name="CacheTtlCheck">
-                    <TextBlock Text="Refresh cached FFXIAH prices older than 24 hours"
-                               TextWrapping="Wrap" />
-                </CheckBox>
-                <CheckBox Name="FindAllCheck" Margin="0,8,0,0">
+                <CheckBox Name="FindAllCheck">
                     <TextBlock Text="Enable FindAll Integration (Windower Addon)"
                                TextWrapping="Wrap" />
                 </CheckBox>

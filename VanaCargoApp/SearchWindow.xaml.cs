@@ -20,7 +20,7 @@ namespace VanaCargoApp
 
         public IconConverter IconConverter { get; } = new IconConverter();
 
-        public SearchWindow(CoreBridge bridge, LoadResult loadResult, string server)
+        public SearchWindow(CoreBridge bridge, LoadResult loadResult)
         {
             _bridge = bridge;
             _loadResult = loadResult;
@@ -40,13 +40,6 @@ namespace VanaCargoApp
             {
                 StatusText.Text = "Select a character first.";
                 return;
-            }
-
-            if (_loadResult?.Settings != null &&
-                string.IsNullOrWhiteSpace(_loadResult.Settings.FindAllDataPath) &&
-                Owner is MainWindow owner)
-            {
-                owner.EnsureFindAllPathsPublic();
             }
 
             SearchButton.IsEnabled = false;
@@ -105,12 +98,10 @@ namespace VanaCargoApp
 
         private ManagedCharacter[] GetSelectedCharacter()
         {
-            var owner = Owner as MainWindow;
-            var selected = owner?.GetSelectedCharacter();
-            if (selected == null)
-                return Array.Empty<ManagedCharacter>();
+            if (Owner is MainWindow owner && owner.CharactersList.SelectedItem is ManagedCharacter selected)
+                return new[] { selected };
 
-            return new[] { selected };
+            return Array.Empty<ManagedCharacter>();
         }
 
         private void OnCancelClick(object sender, RoutedEventArgs e)

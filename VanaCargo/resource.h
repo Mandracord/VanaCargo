@@ -63,11 +63,9 @@
 #define IDC_LIST_RACES                  1033
 #define IDC_SERVER_COMBO                1034
 #define IDC_EXPORT_BG_URL               1021
-#define IDC_EXPORT_MEDIAN               1022
 #define IDC_PROGRESS_LABEL              1023
 #define IDC_ABOUT_TEXT                  1035
 #define IDC_ABOUT_ICON                  1036
-#define IDC_FETCH_FFXIAH                1037
 #define ID_FILE                         32771
 #define ID_CONFIG                       32772
 #define ID_CONFIG_LANGUAGE              32773

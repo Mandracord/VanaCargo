@@ -51,13 +51,6 @@ protected:
 	CArray<CString, LPCTSTR> m_InventoryFiles;
 	CArray<CString, LPCTSTR> m_InventoryNames;
 	CMap<int, int, SearchData*, SearchData*> m_SearchTabs;
-	CMap<int, int, CString, CString&> m_ItemMedianCache;
-	CMap<int, int, BOOL, BOOL&> m_ItemMedianPending;
-	CWinThread *m_MedianThread;
-	CString m_FfxiahServer;
-	bool m_StopMedianThread;
-	int m_MedianTotal;
-	volatile LONG m_MedianCompleted;
 	bool m_PromptForServer;
 	int m_SelectedChar, m_SelectedTab, m_CharactersCount, m_ItemsCount;
 
@@ -71,11 +64,6 @@ protected:
 	void GetSearchResults(SearchData *pParams);
 	ItemArray* GetItemMap(int SelectedCharIndex, int SelectedTabIndex);
 	void SetItemMapAt(int SelectedCharIndex, int SelectedTabIndex, ItemArray *pItemList);
-	void StartMedianFetch(const ItemArray *pItemList);
-	bool FetchMediansForExport(const CArray<bool, bool> &exportedChars);
-	void LoadMedianCacheFromIni(const CString &server);
-	void SaveMedianCacheToIni(const CString &server);
-	CString GetMedianCacheSection(const CString &server) const;
 	void SetServerMenu(const CString &serverName, bool Check = true);
 
 #ifdef _DEBUG
@@ -111,7 +99,6 @@ protected:
 	afx_msg void OnOptionsChange(UINT CmdID);
 	afx_msg void OnSearch();
 	afx_msg void OnExport();
-	afx_msg void OnFetchFfxiah();
 	afx_msg void OnFileQuit();
 	afx_msg void OnHelpAbout();
 	afx_msg HCURSOR OnQueryDragIcon();
@@ -128,28 +115,6 @@ public:
 	afx_msg void OnInventoryColumnAutosize(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnInventoryListRightClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnItemDoubleClick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg LRESULT OnMedianReady(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnMedianProgress(WPARAM wParam, LPARAM lParam);
-
-	bool IsMedianStopRequested() const
-	{
-		return m_StopMedianThread;
-	}
-
-	int GetMedianTotal() const
-	{
-		return m_MedianTotal;
-	}
-
-	LONG IncrementMedianCompleted()
-	{
-		return InterlockedIncrement(&m_MedianCompleted);
-	}
-
-	void ClearMedianThread()
-	{
-		m_MedianThread = NULL;
-	}
 	afx_msg void OnRefreshClose();
 };
 

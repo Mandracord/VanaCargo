@@ -68,7 +68,6 @@ BEGIN
     CONTROL         "",IDC_INVENTORY_TABS,"SysTabControl32",0x0,108,2,459,363,WS_EX_TRANSPARENT
     CONTROL         "",IDC_CHAR_LIST,"SysListView32",LVS_SMALLICON | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | LVS_EDITLABELS | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,7,12,98,353
     CONTROL         "",IDC_INVENTORY_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_ALIGNLEFT | WS_TABSTOP,109,15,456,348
-    PUSHBUTTON      "Load FFXIAH Prices",IDC_FETCH_FFXIAH,445,2,120,14
     RTEXT           "",IDC_ITEM_COUNT,478,366,89,8
 END
 
@@ -81,17 +80,6 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,102,41,50,14
     LTEXT           "Final Fantasy XI region:",IDC_REGION_LABEL,7,7,172,8
     COMBOBOX        IDC_REGION_COMBO,19,21,146,51,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-END
-
-IDD_SERVER_SELECT DIALOGEX 0, 0, 220, 70
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Select Server"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,47,45,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,123,45,50,14
-    LTEXT           "FFXIAH server:",IDC_STATIC,7,7,80,8
-    COMBOBOX        IDC_SERVER_COMBO,17,21,186,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 250, 110
@@ -133,7 +121,6 @@ BEGIN
     CONTROL         "Jobs",IDC_EXPORT_JOBS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,151,50,10
     CONTROL         "Remarks",IDC_EXPORT_REMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,151,50,10
     CONTROL         "BG Wiki URL",IDC_EXPORT_BG_URL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,164,80,10
-    CONTROL         "Avg FFXIAH Price",IDC_EXPORT_MEDIAN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,164,90,10
 END
 
 
@@ -281,25 +268,6 @@ BEGIN
             MENUITEM "English",                     ID_LANGUAGE_ENGLISH
             MENUITEM "French",                      ID_LANGUAGE_FRENCH
             MENUITEM "German",                      ID_LANGUAGE_GERMAN
-        END
-        POPUP "Server"
-        BEGIN
-            MENUITEM "Bahamut",                     ID_SERVER_BAHAMUT
-            MENUITEM "Shiva",                       ID_SERVER_SHIVA
-            MENUITEM "Phoenix",                     ID_SERVER_PHOENIX
-            MENUITEM "Carbuncle",                   ID_SERVER_CARBUNCLE
-            MENUITEM "Fenrir",                      ID_SERVER_FENRIR
-            MENUITEM "Sylph",                       ID_SERVER_SYLPH
-            MENUITEM "Valefor",                     ID_SERVER_VALEFOR
-            MENUITEM "Leviathan",                   ID_SERVER_LEVIATHAN
-            MENUITEM "Odin",                        ID_SERVER_ODIN
-            MENUITEM "Quetzalcoatl",                ID_SERVER_QUETZALCOATL
-            MENUITEM "Siren",                       ID_SERVER_SIREN
-            MENUITEM "Ragnarok",                    ID_SERVER_RAGNAROK
-            MENUITEM "Cerberus",                    ID_SERVER_CERBERUS
-            MENUITEM "Bismarck",                    ID_SERVER_BISMARCK
-            MENUITEM "Lakshmi",                     ID_SERVER_LAKSHMI
-            MENUITEM "Asura",                       ID_SERVER_ASURA
         END
     END
     POPUP "View"

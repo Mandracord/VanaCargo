@@ -19,24 +19,15 @@ namespace VanaCargoApp
 
         private readonly List<CharacterOption> _characters = new List<CharacterOption>();
 
-        public bool FfxiahCacheTtlEnabled { get; private set; }
         public bool FindAllEnabled { get; private set; }
         public string FindAllDataPath { get; private set; }
         public string FindAllKeyItemsPath { get; private set; }
-        public string SelectedServer { get; private set; }
         public IReadOnlyList<CharacterOption> Characters => _characters;
 
-        public SettingsWindow(ManagedSettings settings, IEnumerable<ManagedCharacter> characters, IEnumerable<string> servers, string currentServer)
+        public SettingsWindow(ManagedSettings settings, IEnumerable<ManagedCharacter> characters)
         {
             InitializeComponent();
 
-            if (servers != null)
-                ServerCombo.ItemsSource = servers.ToList();
-            SelectedServer = currentServer ?? string.Empty;
-            ServerCombo.Text = SelectedServer;
-
-            FfxiahCacheTtlEnabled = settings?.FfxiahCacheTtlEnabled ?? true;
-            CacheTtlCheck.IsChecked = FfxiahCacheTtlEnabled;
             FindAllEnabled = settings?.FindAllEnabled ?? false;
             FindAllCheck.IsChecked = FindAllEnabled;
             FindAllDataPath = settings?.FindAllDataPath ?? string.Empty;
@@ -79,11 +70,9 @@ namespace VanaCargoApp
 
         private void OnOk(object sender, RoutedEventArgs e)
         {
-            FfxiahCacheTtlEnabled = CacheTtlCheck.IsChecked == true;
             FindAllEnabled = FindAllCheck.IsChecked == true;
             FindAllDataPath = FindAllDataPathBox.Text?.Trim() ?? string.Empty;
             FindAllKeyItemsPath = FindAllKeyItemsPathBox.Text?.Trim() ?? string.Empty;
-            SelectedServer = ServerCombo.Text?.Trim() ?? string.Empty;
             DialogResult = true;
         }
 

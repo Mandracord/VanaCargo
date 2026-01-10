@@ -12,12 +12,12 @@
 #pragma comment(lib, "comctl32.lib")
 #endif
 
-static CStringW ToCString(const std::wstring &value)
+static CStringW ToCString(const std::wstring& value)
 {
 	return CStringW(value.c_str());
 }
 
-static std::wstring ToWString(const CString &value)
+static std::wstring ToWString(const CString& value)
 {
 	return std::wstring(value.GetString());
 }
@@ -43,12 +43,12 @@ struct GdiplusScope
 
 static GdiplusScope g_gdiplusScope;
 
-static bool BuildLegacyIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
+static bool BuildLegacyIconPixels(const FFXiIconInfo& iconInfo, CoreItem& item)
 {
 	if (g_gdiplusScope.Token == 0)
 		return false;
 
-	BITMAPINFO *bmpInfo = (BITMAPINFO*)&iconInfo.ImageInfo;
+	BITMAPINFO* bmpInfo = (BITMAPINFO*)&iconInfo.ImageInfo;
 	int width = bmpInfo->bmiHeader.biWidth;
 	int height = bmpInfo->bmiHeader.biHeight;
 	if (width <= 0)
@@ -61,7 +61,7 @@ static bool BuildLegacyIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 	if (hDC == NULL)
 		return false;
 
-	void *pDst = NULL;
+	void* pDst = NULL;
 	HBITMAP hBitmap = ::CreateDIBSection(hDC, bmpInfo, DIB_RGB_COLORS, &pDst, NULL, 0);
 	if (hBitmap == NULL || pDst == NULL)
 	{
@@ -87,7 +87,7 @@ static bool BuildLegacyIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 	bool ok = false;
 	if (hIcon != NULL)
 	{
-		Gdiplus::Bitmap *bitmap = Gdiplus::Bitmap::FromHICON(hIcon);
+		Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromHICON(hIcon);
 		if (bitmap != NULL)
 		{
 			const UINT bmpWidth = bitmap->GetWidth();
@@ -104,7 +104,7 @@ static bool BuildLegacyIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 				item.IconPixels.resize((size_t)item.IconStride * item.IconHeight);
 
 				int srcStride = data.Stride;
-				unsigned char *srcBase = (unsigned char*)data.Scan0;
+				unsigned char* srcBase = (unsigned char*)data.Scan0;
 				if (srcStride < 0)
 				{
 					srcBase = srcBase + (size_t)(item.IconHeight - 1) * (size_t)(-srcStride);
@@ -113,8 +113,8 @@ static bool BuildLegacyIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 
 				for (int y = 0; y < item.IconHeight; ++y)
 				{
-					unsigned char *srcRow = srcBase + (size_t)y * (size_t)srcStride;
-					unsigned char *dstRow = item.IconPixels.data() + (size_t)y * (size_t)item.IconStride;
+					unsigned char* srcRow = srcBase + (size_t)y * (size_t)srcStride;
+					unsigned char* dstRow = item.IconPixels.data() + (size_t)y * (size_t)item.IconStride;
 					memcpy(dstRow, srcRow, (size_t)item.IconStride);
 				}
 
@@ -135,7 +135,7 @@ static bool BuildLegacyIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 }
 #endif
 
-static void EnsureDefaultConfig(CSimpleIni &ini)
+static void EnsureDefaultConfig(CSimpleIni& ini)
 {
 	if (ini.GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_GAME_REGION_KEY) == NULL)
 		ini.SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_GAME_REGION_KEY, INI_FILE_GAME_REGION_VALUE);
@@ -145,12 +145,6 @@ static void EnsureDefaultConfig(CSimpleIni &ini)
 
 	if (ini.GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_COMPACT_LIST_KEY) == NULL)
 		ini.SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_COMPACT_LIST_KEY, INI_FILE_COMPACT_LIST_VALUE ? 1L : 0L);
-
-	if (ini.GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_SERVER_KEY) == NULL)
-		ini.SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_SERVER_KEY, INI_FILE_FFXIAH_SERVER_VALUE);
-
-	if (ini.GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_CACHE_TTL_KEY) == NULL)
-		ini.SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_CACHE_TTL_KEY, INI_FILE_FFXIAH_CACHE_TTL_VALUE ? 1L : 0L);
 
 	if (ini.GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FINDALL_ENABLED_KEY) == NULL)
 		ini.SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_FINDALL_ENABLED_KEY, INI_FILE_FINDALL_ENABLED_VALUE ? 1L : 0L);
@@ -162,7 +156,7 @@ static void EnsureDefaultConfig(CSimpleIni &ini)
 		ini.SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FINDALL_KEYITEMS_PATH_KEY, INI_FILE_FINDALL_KEYITEMS_PATH_VALUE);
 }
 
-static void EnsureInventoryDefaults(CSimpleIni &ini)
+static void EnsureInventoryDefaults(CSimpleIni& ini)
 {
 	if (ini.GetValue(INI_FILE_INVENTORY_SECTION, INI_FILE_INVENTORY_KEY) == NULL)
 		ini.SetValue(INI_FILE_INVENTORY_SECTION, INI_FILE_INVENTORY_KEY, INI_FILE_INVENTORY_VALUE);
@@ -198,7 +192,7 @@ static void EnsureInventoryDefaults(CSimpleIni &ini)
 		ini.SetValue(INI_FILE_INVENTORY_SECTION, INI_FILE_MOG_WARDROBE_8_KEY, INI_FILE_MOG_WARDROBE_8_VALUE);
 }
 
-static bool IsAbsolutePath(const std::wstring &path)
+static bool IsAbsolutePath(const std::wstring& path)
 {
 	if (path.empty())
 		return false;
@@ -209,7 +203,7 @@ static bool IsAbsolutePath(const std::wstring &path)
 	return path.size() >= 2 && path[0] == L'\\' && path[1] == L'\\';
 }
 
-static std::wstring GetDirectoryPath(const std::wstring &path)
+static std::wstring GetDirectoryPath(const std::wstring& path)
 {
 	size_t pos = path.find_last_of(L"\\/");
 	if (pos == std::wstring::npos)
@@ -218,7 +212,7 @@ static std::wstring GetDirectoryPath(const std::wstring &path)
 	return path.substr(0, pos);
 }
 
-static std::wstring ResolvePath(const std::wstring &baseDir, const std::wstring &value)
+static std::wstring ResolvePath(const std::wstring& baseDir, const std::wstring& value)
 {
 	if (value.empty())
 		return value;
@@ -236,7 +230,7 @@ static std::wstring ResolvePath(const std::wstring &baseDir, const std::wstring 
 	return combined;
 }
 
-static std::wstring TrimWhitespace(const std::wstring &value)
+static std::wstring TrimWhitespace(const std::wstring& value)
 {
 	if (value.empty())
 		return value;
@@ -267,8 +261,7 @@ static std::wstring GetExeDir()
 	return full.substr(0, pos);
 }
 
-
-static bool FileExists(const std::wstring &path)
+static bool FileExists(const std::wstring& path)
 {
 	if (path.empty())
 		return false;
@@ -283,7 +276,7 @@ struct KeyItemInfo
 	std::wstring Category;
 };
 
-static bool ReadFileText(const std::wstring &path, std::string &out)
+static bool ReadFileText(const std::wstring& path, std::string& out)
 {
 	out.clear();
 	CFile file;
@@ -299,7 +292,7 @@ static bool ReadFileText(const std::wstring &path, std::string &out)
 	return true;
 }
 
-static std::wstring ToWide(const std::string &value)
+static std::wstring ToWide(const std::string& value)
 {
 	if (value.empty())
 		return std::wstring();
@@ -314,7 +307,7 @@ static std::wstring ToWide(const std::string &value)
 	return result;
 }
 
-static std::wstring CapitalizeFirstLetter(const std::wstring &value)
+static std::wstring CapitalizeFirstLetter(const std::wstring& value)
 {
 	if (value.empty())
 		return value;
@@ -332,7 +325,7 @@ static std::wstring CapitalizeFirstLetter(const std::wstring &value)
 	return result;
 }
 
-static bool ParseQuotedString(const std::string &data, size_t start, std::string &out, size_t &endPos)
+static bool ParseQuotedString(const std::string& data, size_t start, std::string& out, size_t& endPos)
 {
 	out.clear();
 	endPos = std::string::npos;
@@ -380,7 +373,7 @@ static bool ParseQuotedString(const std::string &data, size_t start, std::string
 	return false;
 }
 
-static void ParseKeyItems(const std::string &data, std::unordered_map<int, KeyItemInfo> &items)
+static void ParseKeyItems(const std::string& data, std::unordered_map<int, KeyItemInfo>& items)
 {
 	size_t pos = 0;
 	while ((pos = data.find("id=", pos)) != std::string::npos)
@@ -435,7 +428,7 @@ static void ParseKeyItems(const std::string &data, std::unordered_map<int, KeyIt
 	}
 }
 
-static bool ParseFindAllData(const std::string &data, long long &gil, std::vector<int> &keyItemIds)
+static bool ParseFindAllData(const std::string& data, long long& gil, std::vector<int>& keyItemIds)
 {
 	gil = 0;
 	keyItemIds.clear();
@@ -494,8 +487,7 @@ static bool ParseFindAllData(const std::string &data, long long &gil, std::vecto
 		if (idEnd == std::string::npos || idEnd > braceEnd)
 			break;
 
-		std::string idText = data.substr(idStart, idEnd - idStart);
-		int id = atoi(idText.c_str());
+		int id = atoi(data.substr(idStart, idEnd - idStart).c_str());
 		if (id > 0)
 			keyItemIds.push_back(id);
 
@@ -505,7 +497,7 @@ static bool ParseFindAllData(const std::string &data, long long &gil, std::vecto
 	return true;
 }
 
-static void AddKeyItem(const KeyItemInfo *info, int id, std::vector<CoreItem> &items)
+static void AddKeyItem(const KeyItemInfo* info, int id, std::vector<CoreItem>& items)
 {
 	CoreItem item;
 	item.Id = id;
@@ -518,8 +510,6 @@ static void AddKeyItem(const KeyItemInfo *info, int id, std::vector<CoreItem> &i
 	item.Level.clear();
 	item.Jobs.clear();
 	item.Remarks = info ? info->Category : std::wstring();
-	item.Median.clear();
-	item.LastSale.clear();
 	item.IconWidth = 0;
 	item.IconHeight = 0;
 	item.IconStride = 0;
@@ -535,7 +525,7 @@ static void AddKeyItem(const KeyItemInfo *info, int id, std::vector<CoreItem> &i
 	items.push_back(item);
 }
 
-static void AddGilItem(long long gil, std::vector<CoreItem> &items)
+static void AddGilItem(long long gil, std::vector<CoreItem>& items)
 {
 	if (gil <= 0)
 		return;
@@ -551,8 +541,6 @@ static void AddGilItem(long long gil, std::vector<CoreItem> &items)
 	item.Level.clear();
 	item.Jobs.clear();
 	item.Remarks = L"Gil";
-	item.Median.clear();
-	item.LastSale.clear();
 	item.IconWidth = 0;
 	item.IconHeight = 0;
 	item.IconStride = 0;
@@ -560,7 +548,7 @@ static void AddGilItem(long long gil, std::vector<CoreItem> &items)
 	items.push_back(item);
 }
 
-static std::wstring BuildFindAllDataFile(const std::wstring &dataDir, const std::wstring &characterName)
+static std::wstring BuildFindAllDataFile(const std::wstring& dataDir, const std::wstring& characterName)
 {
 	std::wstring dataFile = dataDir;
 	if (!dataFile.empty() && dataFile.back() != L'\\' && dataFile.back() != L'/')
@@ -570,9 +558,9 @@ static std::wstring BuildFindAllDataFile(const std::wstring &dataDir, const std:
 	return dataFile;
 }
 
-static void AddFindAllErrorItem(const std::wstring &dataFile, const std::wstring &keyItemsPath,
-	const std::wstring &error,
-	std::vector<CoreItem> &items)
+static void AddFindAllErrorItem(const std::wstring& dataFile, const std::wstring& keyItemsPath,
+	const std::wstring& error,
+	std::vector<CoreItem>& items)
 {
 	CoreItem item;
 	item.Id = 0;
@@ -587,8 +575,6 @@ static void AddFindAllErrorItem(const std::wstring &dataFile, const std::wstring
 	item.Level.clear();
 	item.Jobs.clear();
 	item.Remarks = dataFile;
-	item.Median.clear();
-	item.LastSale.clear();
 	item.IconWidth = 0;
 	item.IconHeight = 0;
 	item.IconStride = 0;
@@ -608,8 +594,6 @@ static void AddFindAllErrorItem(const std::wstring &dataFile, const std::wstring
 		keyItem.Level.clear();
 		keyItem.Jobs.clear();
 		keyItem.Remarks.clear();
-		keyItem.Median.clear();
-		keyItem.LastSale.clear();
 		keyItem.IconWidth = 0;
 		keyItem.IconHeight = 0;
 		keyItem.IconStride = 0;
@@ -618,14 +602,13 @@ static void AddFindAllErrorItem(const std::wstring &dataFile, const std::wstring
 	}
 }
 
-static bool LoadFindAllKeyItems(const std::wstring &dataDir,
-	const std::wstring &keyItemsPath,
-	const std::wstring &characterName,
-	std::vector<CoreItem> &items,
-	std::wstring &error)
+static bool LoadFindAllKeyItems(const std::wstring& dataDir,
+	const std::wstring& keyItemsPath,
+	const std::wstring& characterName,
+	std::vector<CoreItem>& items,
+	std::wstring& error)
 {
 	error.clear();
-
 
 	if (dataDir.empty())
 	{
@@ -679,20 +662,20 @@ static bool LoadFindAllKeyItems(const std::wstring &dataDir,
 	{
 		int id = keyItemIds[i];
 		std::unordered_map<int, KeyItemInfo>::const_iterator it = keyItems.find(id);
-		const KeyItemInfo *info = it != keyItems.end() ? &it->second : NULL;
+		const KeyItemInfo* info = it != keyItems.end() ? &it->second : NULL;
 		AddKeyItem(info, id, items);
 	}
 
 	return true;
 }
 
-static void FillIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
+static void FillIconPixels(const FFXiIconInfo& iconInfo, CoreItem& item)
 {
 #ifdef GDIPLUS_IMAGE_RESIZING
 	if (BuildLegacyIconPixels(iconInfo, item))
 		return;
 #endif
-	const BITMAPINFOHEADER &header = iconInfo.ImageInfo.bmiHeader;
+	const BITMAPINFOHEADER& header = iconInfo.ImageInfo.bmiHeader;
 	int width = header.biWidth;
 	int height = header.biHeight;
 	if (width <= 0)
@@ -712,7 +695,7 @@ static void FillIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 	item.IconPixels.clear();
 	item.IconPixels.resize((size_t)item.IconStride * absHeight);
 
-	const unsigned char *raw = reinterpret_cast<const unsigned char*>(iconInfo.ImageInfo.ImageData);
+	const unsigned char* raw = reinterpret_cast<const unsigned char*>(iconInfo.ImageInfo.ImageData);
 	if (bitsPerPixel == 8)
 	{
 		for (int y = 0; y < absHeight; ++y)
@@ -721,7 +704,7 @@ static void FillIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 			for (int x = 0; x < width; ++x)
 			{
 				unsigned char idx = raw[srcRow * width + x];
-				const RGBQUAD &color = iconInfo.ImageInfo.bmiColors[idx % 64];
+				const RGBQUAD& color = iconInfo.ImageInfo.bmiColors[idx % 64];
 				size_t dstIndex = (size_t)y * item.IconStride + x * 4;
 				item.IconPixels[dstIndex + 0] = color.rgbBlue;
 				item.IconPixels[dstIndex + 1] = color.rgbGreen;
@@ -737,8 +720,8 @@ static void FillIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 		for (int y = 0; y < absHeight; ++y)
 		{
 			int srcRow = height > 0 ? (absHeight - 1 - y) : y;
-			const unsigned char *src = raw + (size_t)srcRow * width * 4;
-			unsigned char *dst = item.IconPixels.data() + (size_t)y * item.IconStride;
+			const unsigned char* src = raw + (size_t)srcRow * width * 4;
+			unsigned char* dst = item.IconPixels.data() + (size_t)y * item.IconStride;
 			for (int x = 0; x < width; ++x)
 			{
 				dst[x * 4 + 0] = src[x * 4 + 0];
@@ -751,10 +734,10 @@ static void FillIconPixels(const FFXiIconInfo &iconInfo, CoreItem &item)
 	}
 }
 
-bool CoreApi::LoadConfig(const std::wstring &configPath,
-	CoreSettings &settings,
-	std::vector<InventoryTabInfo> &tabs,
-	std::vector<CharacterInfo> &characters)
+bool CoreApi::LoadConfig(const std::wstring& configPath,
+	CoreSettings& settings,
+	std::vector<InventoryTabInfo>& tabs,
+	std::vector<CharacterInfo>& characters)
 {
 	tabs.clear();
 	characters.clear();
@@ -764,7 +747,7 @@ bool CoreApi::LoadConfig(const std::wstring &configPath,
 
 	if (GetFileAttributes(iniPath) == MAXDWORD)
 	{
-		FILE *iniFile = NULL;
+		FILE* iniFile = NULL;
 		_tfopen_s(&iniFile, iniPath, _T("wb"));
 		if (iniFile != NULL)
 			fclose(iniFile);
@@ -779,10 +762,6 @@ bool CoreApi::LoadConfig(const std::wstring &configPath,
 	settings.Region = (int)ini.GetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_GAME_REGION_KEY, INI_FILE_GAME_REGION_VALUE);
 	settings.Language = (int)ini.GetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_LANGUAGE_KEY, INI_FILE_LANGUAGE_VALUE);
 	settings.CompactList = ini.GetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_COMPACT_LIST_KEY, INI_FILE_COMPACT_LIST_VALUE ? 1L : 0L) != 0;
-
-	const TCHAR *server = ini.GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_SERVER_KEY);
-	settings.FfxiahServer = server ? std::wstring(server) : std::wstring(INI_FILE_FFXIAH_SERVER_VALUE);
-	settings.FfxiahCacheTtlEnabled = ini.GetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_CACHE_TTL_KEY, INI_FILE_FFXIAH_CACHE_TTL_VALUE ? 1L : 0L) != 0;
 	settings.FindAllEnabled = ini.GetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_FINDALL_ENABLED_KEY, INI_FILE_FINDALL_ENABLED_VALUE ? 1L : 0L) != 0;
 
 	CString findAllData(ini.GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FINDALL_DATA_PATH_KEY));
@@ -811,8 +790,8 @@ bool CoreApi::LoadConfig(const std::wstring &configPath,
 		keys.sort(CSimpleIni::Entry::LoadOrder());
 		for (CSimpleIni::TNamesDepend::const_iterator it = keys.begin(); it != keys.end(); ++it)
 		{
-			const TCHAR *key = it->pItem;
-			const TCHAR *value = ini.GetValue(INI_FILE_INVENTORY_SECTION, key);
+			const TCHAR* key = it->pItem;
+			const TCHAR* value = ini.GetValue(INI_FILE_INVENTORY_SECTION, key);
 
 			InventoryTabInfo info;
 			info.FileName = key ? std::wstring(key) : std::wstring();
@@ -845,7 +824,7 @@ bool CoreApi::LoadConfig(const std::wstring &configPath,
 			continue;
 
 		CString id = finder.GetFileName();
-		const TCHAR *display = ini.GetValue(INI_FILE_CHARACTERS_SECTION, id);
+		const TCHAR* display = ini.GetValue(INI_FILE_CHARACTERS_SECTION, id);
 
 		CharacterInfo character;
 		character.Id = std::wstring(id.GetString());
@@ -862,10 +841,10 @@ bool CoreApi::LoadConfig(const std::wstring &configPath,
 	return true;
 }
 
-bool CoreApi::LoadInventoryForCharacter(const CoreSettings &settings,
-	const CharacterInfo &character,
-	const std::vector<InventoryTabInfo> &tabs,
-	std::vector<InventoryTab> &outTabs)
+bool CoreApi::LoadInventoryForCharacter(const CoreSettings& settings,
+	const CharacterInfo& character,
+	const std::vector<InventoryTabInfo>& tabs,
+	std::vector<InventoryTab>& outTabs)
 {
 	outTabs.clear();
 
@@ -880,7 +859,7 @@ bool CoreApi::LoadInventoryForCharacter(const CoreSettings &settings,
 
 	for (size_t i = 0; i < tabs.size(); ++i)
 	{
-		const InventoryTabInfo &tabInfo = tabs[i];
+		const InventoryTabInfo& tabInfo = tabs[i];
 		InventoryTab tab;
 		tab.Info = tabInfo;
 
@@ -921,7 +900,7 @@ bool CoreApi::LoadInventoryForCharacter(const CoreSettings &settings,
 		if (helper.ParseInventoryFile(invFile, location, &itemMap, settings.Language, false))
 		{
 			POSITION pos = itemMap.GetStartPosition();
-			InventoryItem *item = NULL;
+			InventoryItem* item = NULL;
 			int itemId = 0;
 
 			while (pos != NULL)
@@ -941,8 +920,6 @@ bool CoreApi::LoadInventoryForCharacter(const CoreSettings &settings,
 				coreItem.Level = ToWString(item->Level);
 				coreItem.Jobs = ToWString(item->Jobs);
 				coreItem.Remarks = ToWString(item->Remarks);
-				coreItem.Median = ToWString(item->Median);
-				coreItem.LastSale = std::wstring();
 				coreItem.IconWidth = 0;
 				coreItem.IconHeight = 0;
 				coreItem.IconStride = 0;
@@ -962,7 +939,7 @@ bool CoreApi::LoadInventoryForCharacter(const CoreSettings &settings,
 	return true;
 }
 
-bool CoreApi::SaveSettings(const std::wstring &configPath, const CoreSettings &settings)
+bool CoreApi::SaveSettings(const std::wstring& configPath, const CoreSettings& settings)
 {
 	CSimpleIni ini(true, false, false);
 	CStringW iniPath = ToCString(configPath);
@@ -973,8 +950,6 @@ bool CoreApi::SaveSettings(const std::wstring &configPath, const CoreSettings &s
 	ini.SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_LANGUAGE_KEY, settings.Language);
 	ini.SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_COMPACT_LIST_KEY, settings.CompactList ? 1L : 0L);
 	ini.SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_GAME_DIRECTORY, ToCString(settings.FfxiPath));
-	ini.SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_SERVER_KEY, ToCString(settings.FfxiahServer));
-	ini.SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_CACHE_TTL_KEY, settings.FfxiahCacheTtlEnabled ? 1L : 0L);
 	ini.SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_FINDALL_ENABLED_KEY, settings.FindAllEnabled ? 1L : 0L);
 	ini.SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FINDALL_DATA_PATH_KEY, ToCString(settings.FindAllDataPath));
 	ini.SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FINDALL_KEYITEMS_PATH_KEY, ToCString(settings.FindAllKeyItemsPath));
@@ -982,189 +957,8 @@ bool CoreApi::SaveSettings(const std::wstring &configPath, const CoreSettings &s
 	return ini.SaveFile(iniPath) >= 0;
 }
 
-static CString FormatCacheSection(const std::wstring &server, const TCHAR *baseSection)
-{
-	CString section;
-	if (server.empty())
-		section = baseSection;
-	else
-		section.Format(_T("%s_%s"), baseSection, CString(server.c_str()));
-	return section;
-}
-
-bool CoreApi::LoadFfxiahCache(const std::wstring &configPath,
-	const std::wstring &server,
-	std::vector<std::pair<int, std::wstring>> &outEntries)
-{
-	outEntries.clear();
-
-	CSimpleIni ini(true, false, false);
-	CStringW iniPath = ToCString(configPath);
-	if (ini.LoadFile(iniPath) < 0)
-		return false;
-
-	CString section = FormatCacheSection(server, INI_FILE_FFXIAH_CACHE_SECTION);
-	CSimpleIni::TNamesDepend keys;
-	if (!ini.GetAllKeys(section, keys))
-		return true;
-
-	keys.sort(CSimpleIni::Entry::LoadOrder());
-	for (CSimpleIni::TNamesDepend::const_iterator it = keys.begin(); it != keys.end(); ++it)
-	{
-		const TCHAR *key = it->pItem;
-		const TCHAR *value = ini.GetValue(section, key);
-		if (key == NULL || value == NULL)
-			continue;
-
-		int itemId = _ttoi(key);
-		if (itemId <= 0)
-			continue;
-
-		outEntries.push_back(std::make_pair(itemId, std::wstring(value)));
-	}
-
-	return true;
-}
-
-bool CoreApi::SaveFfxiahCache(const std::wstring &configPath,
-	const std::wstring &server,
-	const std::vector<std::pair<int, std::wstring>> &entries)
-{
-	CSimpleIni ini(true, false, false);
-	CStringW iniPath = ToCString(configPath);
-	if (ini.LoadFile(iniPath) < 0)
-		return false;
-
-	CString section = FormatCacheSection(server, INI_FILE_FFXIAH_CACHE_SECTION);
-	ini.Delete(section, NULL);
-
-	for (size_t i = 0; i < entries.size(); ++i)
-	{
-		CString key;
-		key.Format(_T("%d"), entries[i].first);
-		ini.SetValue(section, key, CString(entries[i].second.c_str()));
-	}
-
-	return ini.SaveFile(iniPath) >= 0;
-}
-
-bool CoreApi::LoadFfxiahLastSaleCache(const std::wstring &configPath,
-	const std::wstring &server,
-	std::vector<std::pair<int, std::wstring>> &outEntries)
-{
-	outEntries.clear();
-
-	CSimpleIni ini(true, false, false);
-	CStringW iniPath = ToCString(configPath);
-	if (ini.LoadFile(iniPath) < 0)
-		return false;
-
-	CString section = FormatCacheSection(server, INI_FILE_FFXIAH_LAST_CACHE_SECTION);
-	CSimpleIni::TNamesDepend keys;
-	if (!ini.GetAllKeys(section, keys))
-		return true;
-
-	keys.sort(CSimpleIni::Entry::LoadOrder());
-	for (CSimpleIni::TNamesDepend::const_iterator it = keys.begin(); it != keys.end(); ++it)
-	{
-		const TCHAR *key = it->pItem;
-		const TCHAR *value = ini.GetValue(section, key);
-		if (key == NULL || value == NULL)
-			continue;
-
-		int itemId = _ttoi(key);
-		if (itemId <= 0)
-			continue;
-
-		outEntries.push_back(std::make_pair(itemId, std::wstring(value)));
-	}
-
-	return true;
-}
-
-bool CoreApi::SaveFfxiahLastSaleCache(const std::wstring &configPath,
-	const std::wstring &server,
-	const std::vector<std::pair<int, std::wstring>> &entries)
-{
-	CSimpleIni ini(true, false, false);
-	CStringW iniPath = ToCString(configPath);
-	if (ini.LoadFile(iniPath) < 0)
-		return false;
-
-	CString section = FormatCacheSection(server, INI_FILE_FFXIAH_LAST_CACHE_SECTION);
-	ini.Delete(section, NULL);
-
-	for (size_t i = 0; i < entries.size(); ++i)
-	{
-		CString key;
-		key.Format(_T("%d"), entries[i].first);
-		ini.SetValue(section, key, CString(entries[i].second.c_str()));
-	}
-
-	return ini.SaveFile(iniPath) >= 0;
-}
-
-bool CoreApi::LoadFfxiahCacheTimes(const std::wstring &configPath,
-	const std::wstring &server,
-	std::vector<std::pair<int, long long>> &outEntries)
-{
-	outEntries.clear();
-
-	CSimpleIni ini(true, false, false);
-	CStringW iniPath = ToCString(configPath);
-	if (ini.LoadFile(iniPath) < 0)
-		return false;
-
-	CString section = FormatCacheSection(server, INI_FILE_FFXIAH_CACHE_TIME_SECTION);
-	CSimpleIni::TNamesDepend keys;
-	if (!ini.GetAllKeys(section, keys))
-		return true;
-
-	keys.sort(CSimpleIni::Entry::LoadOrder());
-	for (CSimpleIni::TNamesDepend::const_iterator it = keys.begin(); it != keys.end(); ++it)
-	{
-		const TCHAR *key = it->pItem;
-		const TCHAR *value = ini.GetValue(section, key);
-		if (key == NULL || value == NULL)
-			continue;
-
-		int itemId = _ttoi(key);
-		if (itemId <= 0)
-			continue;
-
-		long long ts = _ttoi64(value);
-		outEntries.push_back(std::make_pair(itemId, ts));
-	}
-
-	return true;
-}
-
-bool CoreApi::SaveFfxiahCacheTimes(const std::wstring &configPath,
-	const std::wstring &server,
-	const std::vector<std::pair<int, long long>> &entries)
-{
-	CSimpleIni ini(true, false, false);
-	CStringW iniPath = ToCString(configPath);
-	if (ini.LoadFile(iniPath) < 0)
-		return false;
-
-	CString section = FormatCacheSection(server, INI_FILE_FFXIAH_CACHE_TIME_SECTION);
-	ini.Delete(section, NULL);
-
-	for (size_t i = 0; i < entries.size(); ++i)
-	{
-		CString key;
-		key.Format(_T("%d"), entries[i].first);
-		CString value;
-		value.Format(_T("%lld"), entries[i].second);
-		ini.SetValue(section, key, value);
-	}
-
-	return ini.SaveFile(iniPath) >= 0;
-}
-
-bool CoreApi::SaveCharacterDisplayNames(const std::wstring &configPath,
-	const std::vector<std::pair<std::wstring, std::wstring>> &entries)
+bool CoreApi::SaveCharacterDisplayNames(const std::wstring& configPath,
+	const std::vector<std::pair<std::wstring, std::wstring>>& entries)
 {
 	CSimpleIni ini(true, false, false);
 	CStringW iniPath = ToCString(configPath);
@@ -1173,8 +967,8 @@ bool CoreApi::SaveCharacterDisplayNames(const std::wstring &configPath,
 
 	for (size_t i = 0; i < entries.size(); ++i)
 	{
-		const std::wstring &id = entries[i].first;
-		const std::wstring &name = entries[i].second;
+		const std::wstring& id = entries[i].first;
+		const std::wstring& name = entries[i].second;
 		if (id.empty())
 			continue;
 
@@ -1187,3 +981,8 @@ bool CoreApi::SaveCharacterDisplayNames(const std::wstring &configPath,
 
 	return ini.SaveFile(iniPath) >= 0;
 }
+
+
+
+
+		

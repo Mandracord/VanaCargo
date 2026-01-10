@@ -10,15 +10,10 @@
 #define INI_FILE_COLUMNS_SECTION        _T("Columns")
 #define INI_FILE_EXPORT_SECTION         _T("Export")
 #define INI_FILE_CONFIG_SECTION         _T("Config")
-#define INI_FILE_FFXIAH_CACHE_SECTION   _T("FfxiahCache")
-#define INI_FILE_FFXIAH_CACHE_TIME_SECTION _T("FfxiahCacheTime")
-#define INI_FILE_FFXIAH_LAST_CACHE_SECTION _T("FfxiahLastCache")
 
 #define INI_FILE_COL_NAME_KEY           _T("Name")
 #define INI_FILE_COL_ATTR_KEY           _T("Attr")
 #define INI_FILE_COL_DESC_KEY           _T("Description")
-#define INI_FILE_COL_MEDIAN_KEY         _T("Avg FFXIAH Price")
-#define INI_FILE_COL_LAST_SALE_KEY      _T("Last FFXIAH Sale")
 #define INI_FILE_COL_TYPE_KEY           _T("Type")
 #define INI_FILE_COL_RACES_KEY          _T("Races")
 #define INI_FILE_COL_LEVEL_KEY          _T("Level")
@@ -28,8 +23,6 @@
 #define INI_FILE_COL_NAME_VALUE         _T("150")
 #define INI_FILE_COL_ATTR_VALUE         _T("50")
 #define INI_FILE_COL_DESC_VALUE         _T("250")
-#define INI_FILE_COL_MEDIAN_VALUE       _T("100")
-#define INI_FILE_COL_LAST_SALE_VALUE    _T("100")
 #define INI_FILE_COL_TYPE_VALUE         _T("50")
 #define INI_FILE_COL_RACES_VALUE        _T("50")
 #define INI_FILE_COL_LEVEL_VALUE        _T("50")
@@ -78,14 +71,10 @@
 #define INI_FILE_LANGUAGE_KEY           _T("Language")
 #define INI_FILE_COMPACT_LIST_KEY       _T("CompactList")
 #define INI_FILE_GAME_DIRECTORY         _T("FFXiPath")
-#define INI_FILE_FFXIAH_SERVER_KEY      _T("FfxiahServer")
-#define INI_FILE_FFXIAH_CACHE_TTL_KEY   _T("FfxiahCacheTtlEnabled")
 #define INI_FILE_FINDALL_ENABLED_KEY    _T("FindAllEnabled")
 #define INI_FILE_FINDALL_DATA_PATH_KEY  _T("FindAllDataPath")
 #define INI_FILE_FINDALL_KEYITEMS_PATH_KEY _T("FindAllKeyItemsPath")
 #define INI_FILE_EXPORT_BG_URL_KEY      _T("BG Wiki")
-#define INI_FILE_EXPORT_MEDIAN_KEY      _T("Avg FFXIAH Price")
-#define INI_FILE_EXPORT_LAST_SALE_KEY   _T("Last FFXIAH Sale")
 
 #define INI_FILE_WINDOW_WIDTH_VALUE     1920L
 #define INI_FILE_WINDOW_HEIGHT_VALUE    1080L
@@ -94,8 +83,6 @@
 #define INI_FILE_GAME_REGION_VALUE      FFXI_REGION_US
 #define INI_FILE_LANGUAGE_VALUE         FFXI_LANG_US
 #define INI_FILE_COMPACT_LIST_VALUE     true
-#define INI_FILE_FFXIAH_SERVER_VALUE    _T("Asura")
-#define INI_FILE_FFXIAH_CACHE_TTL_VALUE true
 #define INI_FILE_FINDALL_ENABLED_VALUE false
 #define INI_FILE_FINDALL_DATA_PATH_VALUE _T("addons\\findAll\\data")
 #define INI_FILE_FINDALL_KEYITEMS_PATH_VALUE _T("res\\key_items.lua")

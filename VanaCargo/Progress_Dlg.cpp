@@ -85,18 +85,18 @@ void CProgress_Dlg::SetProgress(int current, int total)
 
 			if (hours > 0)
 			{
-				status.Format(_T("Loading FFXIAH prices... %d/%d (%d%%) - Time remaining: %u:%02u:%02u"),
+				status.Format(_T("Loading prices... %d/%d (%d%%) - Time remaining: %u:%02u:%02u"),
 					current, total, percent, hours, minutes, seconds);
 			}
 			else
 			{
-				status.Format(_T("Loading FFXIAH prices... %d/%d (%d%%) - Time remaining: %u:%02u"),
+				status.Format(_T("Loading prices... %d/%d (%d%%) - Time remaining: %u:%02u"),
 					current, total, percent, minutes, seconds);
 			}
 		}
 		else
 		{
-			status.Format(_T("Loading FFXIAH prices... %d/%d (%d%%) - Time remaining: --:--"),
+			status.Format(_T("Loading prices... %d/%d (%d%%) - Time remaining: --:--"),
 				current, total, percent);
 		}
 		m_Label.SetWindowText(status);

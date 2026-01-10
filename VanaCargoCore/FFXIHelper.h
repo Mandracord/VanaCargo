@@ -202,7 +202,6 @@ typedef struct _InventoryItem
 	CString ItemToolTip;
 	CString Attr;
 	CString ItemDescription;
-	CString Median;
 	CString Slot;
 	CString Races;
 	CString Level;

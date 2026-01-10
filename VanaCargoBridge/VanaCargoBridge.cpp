@@ -55,8 +55,6 @@ LoadResult^ CoreBridge::LoadConfigAndCharacters(String^ configPath)
 	managedSettings->Language = settings.Language;
 	managedSettings->CompactList = settings.CompactList;
 	managedSettings->FfxiPath = gcnew String(settings.FfxiPath.c_str());
-	managedSettings->FfxiahServer = gcnew String(settings.FfxiahServer.c_str());
-	managedSettings->FfxiahCacheTtlEnabled = settings.FfxiahCacheTtlEnabled;
 	managedSettings->FindAllEnabled = settings.FindAllEnabled;
 	managedSettings->FindAllDataPath = gcnew String(settings.FindAllDataPath.c_str());
 	managedSettings->FindAllKeyItemsPath = gcnew String(settings.FindAllKeyItemsPath.c_str());
@@ -95,131 +93,12 @@ bool CoreBridge::SaveSettings(String^ configPath, ManagedSettings^ settings)
 	nativeSettings.Language = settings->Language;
 	nativeSettings.CompactList = settings->CompactList;
 	nativeSettings.FfxiPath = ToWString(settings->FfxiPath);
-	nativeSettings.FfxiahServer = ToWString(settings->FfxiahServer);
-	nativeSettings.FfxiahCacheTtlEnabled = settings->FfxiahCacheTtlEnabled;
 	nativeSettings.FindAllEnabled = settings->FindAllEnabled;
 	nativeSettings.FindAllDataPath = ToWString(settings->FindAllDataPath);
 	nativeSettings.FindAllKeyItemsPath = ToWString(settings->FindAllKeyItemsPath);
 
 	CoreApi api;
 	return api.SaveSettings(ToWString(configPath), nativeSettings);
-}
-
-array<ManagedMedianEntry^>^ CoreBridge::LoadFfxiahCache(String^ configPath, String^ server)
-{
-	CoreApi api;
-	std::vector<std::pair<int, std::wstring>> entries;
-	if (!api.LoadFfxiahCache(ToWString(configPath), ToWString(server), entries))
-		return nullptr;
-
-	array<ManagedMedianEntry^>^ result = gcnew array<ManagedMedianEntry^>((int)entries.size());
-	for (int i = 0; i < (int)entries.size(); ++i)
-	{
-		ManagedMedianEntry^ entry = gcnew ManagedMedianEntry();
-		entry->ItemId = entries[i].first;
-		entry->Median = gcnew String(entries[i].second.c_str());
-		result[i] = entry;
-	}
-
-	return result;
-}
-
-bool CoreBridge::SaveFfxiahCache(String^ configPath, String^ server, array<ManagedMedianEntry^>^ entries)
-{
-	std::vector<std::pair<int, std::wstring>> nativeEntries;
-	if (entries != nullptr)
-	{
-		nativeEntries.reserve(entries->Length);
-		for (int i = 0; i < entries->Length; ++i)
-		{
-			ManagedMedianEntry^ entry = entries[i];
-			if (entry == nullptr)
-				continue;
-
-			nativeEntries.push_back(std::make_pair(entry->ItemId, ToWString(entry->Median)));
-		}
-	}
-
-	CoreApi api;
-	return api.SaveFfxiahCache(ToWString(configPath), ToWString(server), nativeEntries);
-}
-
-array<ManagedLastSaleEntry^>^ CoreBridge::LoadFfxiahLastSaleCache(String^ configPath, String^ server)
-{
-	CoreApi api;
-	std::vector<std::pair<int, std::wstring>> entries;
-	if (!api.LoadFfxiahLastSaleCache(ToWString(configPath), ToWString(server), entries))
-		return nullptr;
-
-	array<ManagedLastSaleEntry^>^ result = gcnew array<ManagedLastSaleEntry^>((int)entries.size());
-	for (int i = 0; i < (int)entries.size(); ++i)
-	{
-		ManagedLastSaleEntry^ entry = gcnew ManagedLastSaleEntry();
-		entry->ItemId = entries[i].first;
-		entry->LastSale = gcnew String(entries[i].second.c_str());
-		result[i] = entry;
-	}
-
-	return result;
-}
-
-bool CoreBridge::SaveFfxiahLastSaleCache(String^ configPath, String^ server, array<ManagedLastSaleEntry^>^ entries)
-{
-	std::vector<std::pair<int, std::wstring>> nativeEntries;
-	if (entries != nullptr)
-	{
-		nativeEntries.reserve(entries->Length);
-		for (int i = 0; i < entries->Length; ++i)
-		{
-			ManagedLastSaleEntry^ entry = entries[i];
-			if (entry == nullptr)
-				continue;
-
-			nativeEntries.push_back(std::make_pair(entry->ItemId, ToWString(entry->LastSale)));
-		}
-	}
-
-	CoreApi api;
-	return api.SaveFfxiahLastSaleCache(ToWString(configPath), ToWString(server), nativeEntries);
-}
-
-array<ManagedCacheTimeEntry^>^ CoreBridge::LoadFfxiahCacheTimes(String^ configPath, String^ server)
-{
-	CoreApi api;
-	std::vector<std::pair<int, long long>> entries;
-	if (!api.LoadFfxiahCacheTimes(ToWString(configPath), ToWString(server), entries))
-		return nullptr;
-
-	array<ManagedCacheTimeEntry^>^ result = gcnew array<ManagedCacheTimeEntry^>((int)entries.size());
-	for (int i = 0; i < (int)entries.size(); ++i)
-	{
-		ManagedCacheTimeEntry^ entry = gcnew ManagedCacheTimeEntry();
-		entry->ItemId = entries[i].first;
-		entry->Timestamp = entries[i].second;
-		result[i] = entry;
-	}
-
-	return result;
-}
-
-bool CoreBridge::SaveFfxiahCacheTimes(String^ configPath, String^ server, array<ManagedCacheTimeEntry^>^ entries)
-{
-	std::vector<std::pair<int, long long>> nativeEntries;
-	if (entries != nullptr)
-	{
-		nativeEntries.reserve(entries->Length);
-		for (int i = 0; i < entries->Length; ++i)
-		{
-			ManagedCacheTimeEntry^ entry = entries[i];
-			if (entry == nullptr)
-				continue;
-
-			nativeEntries.push_back(std::make_pair(entry->ItemId, entry->Timestamp));
-		}
-	}
-
-	CoreApi api;
-	return api.SaveFfxiahCacheTimes(ToWString(configPath), ToWString(server), nativeEntries);
 }
 
 bool CoreBridge::SaveCharacterDisplayNames(String^ configPath, array<ManagedCharacter^>^ characters)
@@ -242,7 +121,8 @@ bool CoreBridge::SaveCharacterDisplayNames(String^ configPath, array<ManagedChar
 	return api.SaveCharacterDisplayNames(ToWString(configPath), entries);
 }
 
-array<ManagedTab^>^ CoreBridge::LoadInventoryForCharacter(ManagedSettings^ settings,
+array<ManagedTab^>^ CoreBridge::LoadInventoryForCharacter(
+	ManagedSettings^ settings,
 	ManagedCharacter^ character,
 	array<ManagedTabInfo^>^ tabs)
 {
@@ -254,8 +134,6 @@ array<ManagedTab^>^ CoreBridge::LoadInventoryForCharacter(ManagedSettings^ setti
 	nativeSettings.Language = settings->Language;
 	nativeSettings.CompactList = settings->CompactList;
 	nativeSettings.FfxiPath = ToWString(settings->FfxiPath);
-	nativeSettings.FfxiahServer = ToWString(settings->FfxiahServer);
-	nativeSettings.FfxiahCacheTtlEnabled = settings->FfxiahCacheTtlEnabled;
 	nativeSettings.FindAllEnabled = settings->FindAllEnabled;
 	nativeSettings.FindAllDataPath = ToWString(settings->FindAllDataPath);
 	nativeSettings.FindAllKeyItemsPath = ToWString(settings->FindAllKeyItemsPath);
@@ -295,7 +173,7 @@ array<ManagedTab^>^ CoreBridge::LoadInventoryForCharacter(ManagedSettings^ setti
 		array<ManagedItem^>^ items = gcnew array<ManagedItem^>((int)nativeOut[i].Items.size());
 		for (int j = 0; j < (int)nativeOut[i].Items.size(); ++j)
 		{
-			const CoreItem &src = nativeOut[i].Items[j];
+			const CoreItem& src = nativeOut[i].Items[j];
 			ManagedItem^ item = gcnew ManagedItem();
 			item->Id = src.Id;
 			item->Count = src.Count;
@@ -307,11 +185,10 @@ array<ManagedTab^>^ CoreBridge::LoadInventoryForCharacter(ManagedSettings^ setti
 			item->Level = gcnew String(src.Level.c_str());
 			item->Jobs = gcnew String(src.Jobs.c_str());
 			item->Remarks = gcnew String(src.Remarks.c_str());
-			item->Median = gcnew String(src.Median.c_str());
-			item->LastSale = gcnew String(src.LastSale.c_str());
 			item->IconWidth = src.IconWidth;
 			item->IconHeight = src.IconHeight;
 			item->IconStride = src.IconStride;
+
 			if (!src.IconPixels.empty())
 			{
 				array<Byte>^ pixels = gcnew array<Byte>((int)src.IconPixels.size());
@@ -322,6 +199,7 @@ array<ManagedTab^>^ CoreBridge::LoadInventoryForCharacter(ManagedSettings^ setti
 				}
 				item->IconPixels = pixels;
 			}
+
 			items[j] = item;
 		}
 

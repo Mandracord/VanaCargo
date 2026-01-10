@@ -88,265 +88,6 @@ static const ServerMenuEntry kServerMenuEntries[] =
 	{ ID_SERVER_ASURA, _T("Asura") },
 };
 
-#define WM_APP_MEDIAN_READY (WM_APP + 1)
-#define WM_APP_MEDIAN_PROGRESS (WM_APP + 2)
-
-struct MedianFetchResult
-{
-	int ItemId;
-	CString Median;
-};
-
-struct MedianProgressUpdate
-{
-	int Completed;
-	int Total;
-};
-
-struct MedianFetchContext
-{
-	CLootBoxDlg *Dlg;
-	CString Server;
-	CArray<int, int> ItemIds;
-	int NextIndex;
-	volatile LONG ActiveWorkers;
-};
-
-struct ExportMedianFetchContext
-{
-	const CArray<int, int> *ItemIds;
-	CString Server;
-	CMap<int, int, CString, CString&> *Cache;
-	CCriticalSection *CacheLock;
-	volatile LONG *NextIndex;
-	volatile LONG *Completed;
-	volatile LONG *StopFlag;
-};
-
-static CString FormatNumberWithCommas(ULONGLONG value)
-{
-	CString result;
-	while (value >= 1000)
-	{
-		UINT part = (UINT)(value % 1000);
-		value /= 1000;
-		CString chunk;
-		chunk.Format(_T(",%03u"), part);
-		result = chunk + result;
-	}
-
-	CString head;
-	head.Format(_T("%llu"), value);
-	result = head + result;
-	return result;
-}
-
-static bool ExtractMedianForServer(const CStringA &html, const CString &serverName, CString &medianOut)
-{
-	int listStart = html.Find("Item.server_medians");
-	if (listStart < 0)
-		return false;
-
-	listStart = html.Find('[', listStart);
-	if (listStart < 0)
-		return false;
-
-	int listEnd = html.Find("];", listStart);
-	if (listEnd < 0)
-		return false;
-
-	CStringA listData = html.Mid(listStart + 1, listEnd - listStart - 1);
-	CStringA serverUtf8;
-	int serverLen = WideCharToMultiByte(CP_UTF8, 0, serverName, -1, NULL, 0, NULL, NULL);
-	if (serverLen > 0)
-	{
-		char *serverBuf = serverUtf8.GetBuffer(serverLen);
-		WideCharToMultiByte(CP_UTF8, 0, serverName, -1, serverBuf, serverLen, NULL, NULL);
-		serverUtf8.ReleaseBuffer();
-	}
-
-	int objStart = 0;
-	while ((objStart = listData.Find('{', objStart)) >= 0)
-	{
-		int objEnd = listData.Find('}', objStart);
-		if (objEnd < 0)
-			break;
-
-		CStringA obj = listData.Mid(objStart, objEnd - objStart + 1);
-		int namePos = obj.Find("\"server_name\":\"");
-		if (namePos >= 0)
-		{
-			namePos += 15;
-			int nameEnd = obj.Find('\"', namePos);
-			if (nameEnd > namePos)
-			{
-				CStringA name = obj.Mid(namePos, nameEnd - namePos);
-				if (name.CompareNoCase(serverUtf8) == 0)
-				{
-					int medianPos = obj.Find("\"median\":");
-					if (medianPos >= 0)
-					{
-						medianPos += 9;
-						CStringA number;
-						while (medianPos < obj.GetLength())
-						{
-							char c = obj[medianPos++];
-							if (c < '0' || c > '9')
-								break;
-							number.AppendChar(c);
-						}
-
-						if (!number.IsEmpty())
-						{
-							ULONGLONG value = _strtoui64(number, NULL, 10);
-							medianOut = FormatNumberWithCommas(value);
-							return true;
-						}
-					}
-				}
-			}
-		}
-
-		objStart = objEnd + 1;
-	}
-
-	return false;
-}
-
-static bool FetchMedianFromFfxiah(int itemId, const CString &serverName, CString &medianOut)
-{
-	bool ok = false;
-	CStringW host = L"www.ffxiah.com";
-	CStringW path;
-	path.Format(L"/item/%d/", itemId);
-
-	HINTERNET session = WinHttpOpen(L"VanaCargo/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-		WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-	if (session == NULL)
-		return false;
-
-	HINTERNET connect = WinHttpConnect(session, host, INTERNET_DEFAULT_HTTPS_PORT, 0);
-	if (connect == NULL)
-	{
-		WinHttpCloseHandle(session);
-		return false;
-	}
-
-	HINTERNET request = WinHttpOpenRequest(connect, L"GET", path, NULL,
-		WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
-	if (request == NULL)
-	{
-		WinHttpCloseHandle(connect);
-		WinHttpCloseHandle(session);
-		return false;
-	}
-
-	BOOL sent = WinHttpSendRequest(request, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
-		WINHTTP_NO_REQUEST_DATA, 0, 0, 0);
-	if (sent && WinHttpReceiveResponse(request, NULL))
-	{
-		CStringA html;
-		DWORD bytesAvailable = 0;
-		do
-		{
-			if (!WinHttpQueryDataAvailable(request, &bytesAvailable))
-				break;
-
-			if (bytesAvailable == 0)
-				break;
-
-			char *buffer = new char[bytesAvailable + 1];
-			DWORD bytesRead = 0;
-			if (WinHttpReadData(request, buffer, bytesAvailable, &bytesRead))
-			{
-				buffer[bytesRead] = '\0';
-				html.Append(buffer, bytesRead);
-			}
-			delete[] buffer;
-		} while (bytesAvailable > 0);
-
-		if (!html.IsEmpty())
-			ok = ExtractMedianForServer(html, serverName, medianOut);
-	}
-
-	WinHttpCloseHandle(request);
-	WinHttpCloseHandle(connect);
-	WinHttpCloseHandle(session);
-	return ok;
-}
-
-static UINT MedianFetchThread(LPVOID pParam)
-{
-	MedianFetchContext *ctx = (MedianFetchContext*)pParam;
-	if (ctx == NULL || ctx->Dlg == NULL)
-		return 0;
-
-	while (true)
-	{
-		if (ctx->Dlg->IsMedianStopRequested())
-			break;
-
-		int index = (int)InterlockedIncrement(reinterpret_cast<volatile LONG*>(&ctx->NextIndex)) - 1;
-		if (index < 0 || index >= ctx->ItemIds.GetCount())
-			break;
-
-		int itemId = ctx->ItemIds[index];
-		CString median;
-		if (FetchMedianFromFfxiah(itemId, ctx->Server, median))
-		{
-			MedianFetchResult *result = new MedianFetchResult();
-			result->ItemId = itemId;
-			result->Median = median;
-			::PostMessage(ctx->Dlg->m_hWnd, WM_APP_MEDIAN_READY, 0, (LPARAM)result);
-		}
-
-		LONG completed = ctx->Dlg->IncrementMedianCompleted();
-		MedianProgressUpdate *progress = new MedianProgressUpdate();
-		progress->Completed = (int)completed;
-		progress->Total = ctx->Dlg->GetMedianTotal();
-		::PostMessage(ctx->Dlg->m_hWnd, WM_APP_MEDIAN_PROGRESS, 0, (LPARAM)progress);
-	}
-
-	if (InterlockedDecrement(&ctx->ActiveWorkers) <= 0)
-	{
-		ctx->Dlg->ClearMedianThread();
-		delete ctx;
-	}
-	return 0;
-}
-
-static UINT ExportMedianFetchThread(LPVOID pParam)
-{
-	ExportMedianFetchContext *ctx = (ExportMedianFetchContext*)pParam;
-	if (ctx == NULL || ctx->ItemIds == NULL || ctx->Cache == NULL)
-		return 0;
-
-	int total = (int)ctx->ItemIds->GetCount();
-	while (true)
-	{
-		if (*ctx->StopFlag != 0)
-			break;
-
-		LONG index = InterlockedIncrement(ctx->NextIndex) - 1;
-		if (index < 0 || index >= total)
-			break;
-
-		int itemId = (*ctx->ItemIds)[index];
-		CString median;
-		if (!FetchMedianFromFfxiah(itemId, ctx->Server, median))
-			median = _T("0");
-
-		{
-			CSingleLock lock(ctx->CacheLock, TRUE);
-			ctx->Cache->SetAt(itemId, median);
-		}
-
-		InterlockedIncrement(ctx->Completed);
-	}
-
-	return 0;
-}
-
 static bool TryGetServerNameForCommand(UINT cmdId, CString &serverOut)
 {
 	for (int i = 0; i < (int)(sizeof(kServerMenuEntries) / sizeof(kServerMenuEntries[0])); i++)
@@ -358,203 +99,6 @@ static bool TryGetServerNameForCommand(UINT cmdId, CString &serverOut)
 		}
 	}
 	return false;
-}
-
-bool CLootBoxDlg::FetchMediansForExport(const CArray<bool, bool> &exportedChars)
-{
-	if (m_FfxiahServer.IsEmpty())
-		return true;
-
-	CArray<int, int> ids;
-	CMap<int, int, BOOL, BOOL> seen;
-	int FileCount = m_InventoryFiles.GetCount();
-	int CharCount = m_CharacterNames.GetCount();
-
-	for (int CharIndex = 0; CharIndex < CharCount; ++CharIndex)
-	{
-		if (exportedChars[CharIndex] == false)
-			continue;
-
-		InventoryMap *pInvMap = NULL;
-		if (!m_GlobalMap.Lookup(CharIndex, pInvMap) || pInvMap == NULL)
-			continue;
-
-		for (int FileIndex = 0; FileIndex < FileCount; ++FileIndex)
-		{
-			ItemArray *pItemMap = NULL;
-			if (!pInvMap->Lookup(FileIndex, pItemMap) || pItemMap == NULL)
-				continue;
-
-			POSITION ItemPos = pItemMap->GetStartPosition();
-			InventoryItem *pItem = NULL;
-			int ItemID = 0;
-
-			while (ItemPos != NULL)
-			{
-				pItemMap->GetNextAssoc(ItemPos, ItemID, pItem);
-				if (pItem == NULL)
-					continue;
-
-				CString cached;
-				if (m_ItemMedianCache.Lookup(pItem->ItemHdr.ItemID, cached))
-					continue;
-
-				BOOL exists = FALSE;
-				if (!seen.Lookup(pItem->ItemHdr.ItemID, exists))
-				{
-					BOOL value = TRUE;
-					seen.SetAt(pItem->ItemHdr.ItemID, value);
-					ids.Add(pItem->ItemHdr.ItemID);
-				}
-			}
-		}
-	}
-
-	if (ids.GetCount() == 0)
-		return true;
-
-	CProgress_Dlg progress(this);
-	progress.Create(IDD_PROGRESS, this);
-	progress.SetWindowText(_T("Fetching FFXIAH Prices"));
-	progress.SetProgress(0, (int)ids.GetCount());
-
-	int total = (int)ids.GetCount();
-	int maxThreads = 4;
-	int threadCount = total < maxThreads ? total : maxThreads;
-	if (threadCount <= 0)
-		threadCount = 1;
-
-	CCriticalSection cacheLock;
-	volatile LONG nextIndex = 0;
-	volatile LONG completed = 0;
-	volatile LONG stopFlag = 0;
-
-	ExportMedianFetchContext ctx;
-	ctx.ItemIds = &ids;
-	ctx.Server = m_FfxiahServer;
-	ctx.Cache = &m_ItemMedianCache;
-	ctx.CacheLock = &cacheLock;
-	ctx.NextIndex = &nextIndex;
-	ctx.Completed = &completed;
-	ctx.StopFlag = &stopFlag;
-
-	CArray<CWinThread*, CWinThread*> threads;
-	for (int i = 0; i < threadCount; i++)
-	{
-		CWinThread *thread = AfxBeginThread(ExportMedianFetchThread, &ctx, THREAD_PRIORITY_BELOW_NORMAL);
-		if (thread != NULL)
-			threads.Add(thread);
-	}
-
-	if (threads.GetCount() == 0)
-	{
-		progress.DestroyWindow();
-		return false;
-	}
-
-	bool cancelled = false;
-	while (completed < total)
-	{
-		progress.SetProgress((int)completed, total);
-
-		MSG msg;
-		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		if (m_hWnd == NULL || progress.IsCancelled())
-		{
-			cancelled = true;
-			stopFlag = 1;
-			break;
-		}
-
-		Sleep(10);
-	}
-
-	stopFlag = 1;
-	for (int i = 0; i < threads.GetCount(); i++)
-	{
-		if (threads[i] != NULL && threads[i]->m_hThread != NULL)
-			WaitForSingleObject(threads[i]->m_hThread, INFINITE);
-	}
-
-	progress.SetProgress(total, total);
-	progress.DestroyWindow();
-
-	if (cancelled)
-		return false;
-
-	SaveMedianCacheToIni(m_FfxiahServer);
-	return true;
-}
-
-void CLootBoxDlg::LoadMedianCacheFromIni(const CString &server)
-{
-	m_ItemMedianCache.RemoveAll();
-
-	if (m_pIni == NULL || server.IsEmpty())
-		return;
-
-	CString section = GetMedianCacheSection(server);
-	CSimpleIni::TNamesDepend keys;
-	if (!m_pIni->GetAllKeys(section, keys))
-		return;
-
-	for (CSimpleIni::TNamesDepend::const_iterator it = keys.begin(); it != keys.end(); ++it)
-	{
-		const TCHAR *key = it->pItem;
-		const TCHAR *value = m_pIni->GetValue(section, key);
-		if (key == NULL || value == NULL)
-			continue;
-
-		int itemId = _tstoi(key);
-		if (itemId <= 0)
-			continue;
-
-		CString median(value);
-		m_ItemMedianCache.SetAt(itemId, median);
-	}
-}
-
-void CLootBoxDlg::SaveMedianCacheToIni(const CString &server)
-{
-	if (m_pIni == NULL || server.IsEmpty())
-		return;
-
-	CString section = GetMedianCacheSection(server);
-	m_pIni->Delete(section, NULL);
-
-	POSITION pos = m_ItemMedianCache.GetStartPosition();
-	int itemId = 0;
-	CString median;
-	while (pos != NULL)
-	{
-		m_ItemMedianCache.GetNextAssoc(pos, itemId, median);
-		if (itemId <= 0)
-			continue;
-
-		CString key;
-		key.Format(_T("%d"), itemId);
-		m_pIni->SetValue(section, key, median);
-	}
-}
-
-CString CLootBoxDlg::GetMedianCacheSection(const CString &server) const
-{
-	CString section;
-	if (server.IsEmpty())
-	{
-		section = INI_FILE_FFXIAH_CACHE_SECTION;
-	}
-	else
-	{
-		section.Format(_T("%s_%s"), INI_FILE_FFXIAH_CACHE_SECTION, server);
-	}
-
-	return section;
 }
 
 #include "RegionSelect.h"
@@ -580,7 +124,6 @@ BEGIN_MESSAGE_MAP(CLootBoxDlg, ETSLayoutDialog)
 	ON_COMMAND(ID_FILE_SEARCH, OnSearch)
 	ON_COMMAND(ID_FILE_QUIT, OnFileQuit)
 	ON_COMMAND(ID_HELP_ABOUT, OnHelpAbout)
-	ON_BN_CLICKED(IDC_FETCH_FFXIAH, OnFetchFfxiah)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_CHAR_LIST, &CLootBoxDlg::OnListItemClick)
 	ON_NOTIFY(LVN_ENDLABELEDIT, IDC_CHAR_LIST, &CLootBoxDlg::OnEndItemEdit)
 	ON_NOTIFY(LVN_KEYDOWN, IDC_CHAR_LIST, &CLootBoxDlg::OnKeyDownListItem)
@@ -591,8 +134,6 @@ BEGIN_MESSAGE_MAP(CLootBoxDlg, ETSLayoutDialog)
 	ON_NOTIFY(NM_RCLICK, IDC_INVENTORY_LIST, &CLootBoxDlg::OnInventoryListRightClick)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_INVENTORY_LIST, &CLootBoxDlg::OnInventoryColumnAutosize)
 	ON_NOTIFY(NM_DBLCLK, IDC_INVENTORY_LIST, &CLootBoxDlg::OnItemDoubleClick)
-	ON_MESSAGE(WM_APP_MEDIAN_READY, &CLootBoxDlg::OnMedianReady)
-	ON_MESSAGE(WM_APP_MEDIAN_PROGRESS, &CLootBoxDlg::OnMedianProgress)
 	ON_COMMAND(ID_REFRESH_CLOSE, &CLootBoxDlg::OnRefreshClose)
 END_MESSAGE_MAP()
 
@@ -620,10 +161,6 @@ CLootBoxDlg::CLootBoxDlg(CWnd* pParent)
 	m_pSearchDlg = NULL;
 	m_InitDone = false;
 	m_pHelper = NULL;
-	m_MedianThread = NULL;
-	m_StopMedianThread = false;
-	m_MedianTotal = 0;
-	m_MedianCompleted = 0;
 	m_PromptForServer = false;
 }
 
@@ -678,28 +215,6 @@ BOOL CLootBoxDlg::InitDialog()
 	// retrieve the installation path from the configuration file
 	pFFXiPath = m_pIni->GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_GAME_DIRECTORY);
 	SetLanguageMenu(m_Language);
-	SetServerMenu(m_FfxiahServer);
-
-	if (m_PromptForServer)
-	{
-		CArray<CString, LPCTSTR> servers;
-		for (int i = 0; i < (int)(sizeof(kServerMenuEntries) / sizeof(kServerMenuEntries[0])); i++)
-			servers.Add(kServerMenuEntries[i].Name);
-
-		ServerSelect selectDlg(servers, m_FfxiahServer, this);
-		if (selectDlg.DoModal() == IDOK)
-		{
-			CString selected = selectDlg.GetSelectedServer();
-			if (!selected.IsEmpty())
-			{
-				m_FfxiahServer = selected;
-				m_pIni->SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_SERVER_KEY, m_FfxiahServer);
-				SetServerMenu(m_FfxiahServer);
-			}
-		}
-
-		m_PromptForServer = false;
-	}
 
 		if (pFFXiPath != NULL)
 		{
@@ -1059,12 +574,6 @@ BOOL CLootBoxDlg::DefaultConfig()
 		if (pValue == NULL)
 			m_pIni->SetLongValue(INI_FILE_EXPORT_SECTION, INI_FILE_EXPORT_BG_URL_KEY, 1L);
 
-		// check if the Avg FFXIAH Price key exists
-		pValue = m_pIni->GetValue(INI_FILE_EXPORT_SECTION, INI_FILE_EXPORT_MEDIAN_KEY);
-		// create it if it doesn't
-		if (pValue == NULL)
-			m_pIni->SetLongValue(INI_FILE_EXPORT_SECTION, INI_FILE_EXPORT_MEDIAN_KEY, 1L);
-
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// check if the Characters section exists
 		pSectionData = m_pIni->GetSection(INI_FILE_CHARACTERS_SECTION);
@@ -1230,22 +739,6 @@ BOOL CLootBoxDlg::DefaultConfig()
 		if (pValue == NULL)
 			m_pIni->SetValue(INI_FILE_COLUMNS_SECTION, INI_FILE_COL_REMARKS_KEY, INI_FILE_COL_REMARKS_VALUE);
 
-		// check if the Median key exists
-		pValue = m_pIni->GetValue(INI_FILE_COLUMNS_SECTION, INI_FILE_COL_MEDIAN_KEY);
-		// create it if it doesn't
-		if (pValue == NULL)
-			m_pIni->SetValue(INI_FILE_COLUMNS_SECTION, INI_FILE_COL_MEDIAN_KEY, INI_FILE_COL_MEDIAN_VALUE);
-
-		// migrate old Median column name to the new label
-		const TCHAR *pOldMedian = m_pIni->GetValue(INI_FILE_COLUMNS_SECTION, _T("Median"));
-		if (pOldMedian != NULL)
-		{
-			if (pValue == NULL)
-				m_pIni->SetValue(INI_FILE_COLUMNS_SECTION, INI_FILE_COL_MEDIAN_KEY, pOldMedian);
-
-			m_pIni->Delete(INI_FILE_COLUMNS_SECTION, _T("Median"));
-		}
-
 		// remove the legacy URL key if present
 		pValue = m_pIni->GetValue(INI_FILE_COLUMNS_SECTION, _T("URL"));
 		if (pValue != NULL)
@@ -1287,21 +780,6 @@ BOOL CLootBoxDlg::DefaultConfig()
 			m_pIni->SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_LANGUAGE_KEY, INI_FILE_LANGUAGE_VALUE, INI_FILE_LANGUAGE_COMMENT);
 			m_Language = INI_FILE_LANGUAGE_VALUE;
 		}
-
-		// check if the FFXIAH server key exists
-		pValue = m_pIni->GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_SERVER_KEY);
-		if (pValue == NULL)
-		{
-			m_pIni->SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_SERVER_KEY, INI_FILE_FFXIAH_SERVER_VALUE);
-			m_FfxiahServer = INI_FILE_FFXIAH_SERVER_VALUE;
-			m_PromptForServer = true;
-		}
-		else
-		{
-			m_FfxiahServer = pValue;
-		}
-
-		LoadMedianCacheFromIni(m_FfxiahServer);
 
 		// check if the Width key exists
 		pValue = m_pIni->GetValue(INI_FILE_CONFIG_SECTION, INI_FILE_WINDOW_WIDTH_KEY);
@@ -1352,9 +830,6 @@ BOOL CLootBoxDlg::InitLayout()
 	TopLeftPane->addItem(IDC_CHAR_LIST, ABSOLUTE_HORZ);
 
 	TopRightPane = new Pane(this, VERTICAL);
-	TopRightHeader = new Pane(this, HORIZONTAL);
-	TopRightHeader->addItem(IDC_FETCH_FFXIAH, NORESIZE | ALIGN_RIGHT);
-	TopRightPane->addPane(TopRightHeader, NORESIZE, 0);
 
 	TopRightTabs = new PaneTab(pTabCtrl, this, VERTICAL);
 	TopRightTabs->addItem(IDC_INVENTORY_LIST);
@@ -1466,7 +941,6 @@ BOOL CLootBoxDlg::PreTranslateMessage(MSG* pMsg)
 // cleanup on dialog destruction
 void CLootBoxDlg::OnDestroy()
 {
-	m_StopMedianThread = true;
 	FFXiItemList* pInvList = (FFXiItemList*)GetDlgItem(IDC_INVENTORY_LIST);
 	CTabCtrl *pTabCtrl = (CTabCtrl*)GetDlgItem(IDC_INVENTORY_TABS);
 	CListCtrl* pList = (CListCtrl*)GetDlgItem(IDC_CHAR_LIST);
@@ -1560,8 +1034,7 @@ void CLootBoxDlg::OnDestroy()
 
 	if (m_pIni != NULL)
 	{
-		SaveMedianCacheToIni(m_FfxiahServer);
-	m_pIni->SaveFile(INI_FILE_FILENAME);
+		m_pIni->SaveFile(INI_FILE_FILENAME);
 
 		delete(m_pIni);
 		m_pIni = NULL;
@@ -1929,55 +1402,6 @@ void CLootBoxDlg::OnInventoryListRightClick(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-LRESULT CLootBoxDlg::OnMedianReady(WPARAM wParam, LPARAM lParam)
-{
-	MedianFetchResult *result = (MedianFetchResult*)lParam;
-	if (result == NULL)
-		return 0;
-
-	m_ItemMedianCache.SetAt(result->ItemId, result->Median);
-	m_ItemMedianPending.RemoveKey(result->ItemId);
-
-	int listCount = m_InventoryList.GetItemCount();
-	for (int i = 0; i < listCount; i++)
-	{
-		InventoryItem *pItem = (InventoryItem*)m_InventoryList.GetItemData(i);
-		if (pItem != NULL && pItem->ItemHdr.ItemID == (DWORD)result->ItemId)
-		{
-			pItem->Median = result->Median;
-			m_InventoryList.UpdateItemText(result->Median, i, INVENTORY_LIST_COL_MEDIAN);
-		}
-	}
-
-	delete result;
-	return 0;
-}
-
-LRESULT CLootBoxDlg::OnMedianProgress(WPARAM wParam, LPARAM lParam)
-{
-	MedianProgressUpdate *progress = (MedianProgressUpdate*)lParam;
-	if (progress == NULL)
-		return 0;
-
-	CStatic *pStatus = (CStatic*)GetDlgItem(IDC_STATUS_BAR);
-	if (pStatus)
-	{
-		if (progress->Completed < progress->Total)
-		{
-			CString status;
-			status.Format(_T("%s  (Prices %d/%d)"), m_CurrentFile, progress->Completed, progress->Total);
-			pStatus->SetWindowText(status);
-		}
-		else
-		{
-			pStatus->SetWindowText(m_CurrentFile);
-		}
-	}
-
-	delete progress;
-	return 0;
-}
-
 void CLootBoxDlg::OnRightClickInventoryTab(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	CMenu *pMenu = m_pPopMenu->GetSubMenu(0);
@@ -2132,12 +1556,6 @@ BOOL CLootBoxDlg::RefreshList(const ItemArray *pItemList)
 
 				if (pItem != NULL)
 				{
-					CString CachedMedian;
-					if (m_ItemMedianCache.Lookup(pItem->ItemHdr.ItemID, CachedMedian))
-						pItem->Median = CachedMedian;
-					else
-						pItem->Median = _T("0");
-
 					if (pItem->hBitmap == NULL)
 					{
 						pItem->hBitmap = GetItemIcon(&pItem->IconInfo, GetDC(), LIST_ICON_SIZE, LIST_ICON_SIZE,
@@ -2204,64 +1622,6 @@ BOOL CLootBoxDlg::RefreshList(const ItemArray *pItemList)
 	}
 
 	return FALSE;
-}
-
-void CLootBoxDlg::StartMedianFetch(const ItemArray *pItemList)
-{
-	if (pItemList == NULL || m_FfxiahServer.IsEmpty())
-		return;
-
-	if (m_MedianThread != NULL)
-		return;
-
-	CMap<int, int, BOOL, BOOL> seen;
-	CArray<int, int> ids;
-	POSITION ItemPos = pItemList->GetStartPosition();
-	InventoryItem *pItem = NULL;
-	int ItemID = 0;
-
-	while (ItemPos != NULL)
-	{
-		pItemList->GetNextAssoc(ItemPos, ItemID, pItem);
-		if (pItem == NULL)
-			continue;
-
-		if (m_ItemMedianCache.Lookup(pItem->ItemHdr.ItemID, pItem->Median))
-			continue;
-
-		BOOL exists = FALSE;
-		if (!seen.Lookup(pItem->ItemHdr.ItemID, exists))
-		{
-			seen.SetAt(pItem->ItemHdr.ItemID, TRUE);
-			ids.Add(pItem->ItemHdr.ItemID);
-		}
-	}
-
-	if (ids.GetCount() == 0)
-		return;
-
-	MedianFetchContext *ctx = new MedianFetchContext();
-	ctx->Dlg = this;
-	ctx->Server = m_FfxiahServer;
-	ctx->ItemIds.Copy(ids);
-	ctx->NextIndex = 0;
-
-	m_StopMedianThread = false;
-	m_MedianTotal = (int)ids.GetCount();
-	m_MedianCompleted = 0;
-	m_ItemMedianPending.RemoveAll();
-
-	for (INT_PTR i = 0; i < ids.GetCount(); i++)
-	{
-		BOOL value = TRUE;
-		m_ItemMedianPending.SetAt(ids[(int)i], value);
-	}
-
-	const int workerCount = 4;
-	ctx->ActiveWorkers = workerCount;
-	m_MedianThread = (CWinThread*)1;
-	for (int i = 0; i < workerCount; i++)
-		AfxBeginThread(MedianFetchThread, ctx, THREAD_PRIORITY_BELOW_NORMAL);
 }
 
 void CLootBoxDlg::SetLanguageMenu(int Language, bool Check)
@@ -2362,15 +1722,6 @@ afx_msg void CLootBoxDlg::OnExport()
 
 				Filename = SaveDialog.GetPathName();
 
-				if ((BitMask & EXPORT_MEDIAN) == EXPORT_MEDIAN)
-				{
-					if (!FetchMediansForExport(ExportedChars))
-					{
-						AfxMessageBox(_T("Export cancelled."));
-						return;
-					}
-				}
-
 				Exporter.CreateFile(Filename, ColumnCount);
 
 				Exporter.AddColumn(_T("Character"))
@@ -2402,9 +1753,6 @@ afx_msg void CLootBoxDlg::OnExport()
 
 				if ((BitMask & EXPORT_BG_URL) == EXPORT_BG_URL)
 					Exporter.AddColumn(INI_FILE_EXPORT_BG_URL_KEY);
-
-				if ((BitMask & EXPORT_MEDIAN) == EXPORT_MEDIAN)
-					Exporter.AddColumn(INI_FILE_EXPORT_MEDIAN_KEY);
 
 				for (int CharIndex = 0; CharIndex < CharCount; ++CharIndex)
 				{
@@ -2461,15 +1809,6 @@ afx_msg void CLootBoxDlg::OnExport()
 										FFXiItemList::BuildBgWikiUrl(pItem->ItemName, Url);
 										Exporter.AddColumn(Url);
 									}
-
-									if ((BitMask & EXPORT_MEDIAN) == EXPORT_MEDIAN)
-									{
-										CString Median;
-										if (!m_ItemMedianCache.Lookup(pItem->ItemHdr.ItemID, Median))
-											Median = pItem->Median.IsEmpty() ? _T("0") : pItem->Median;
-
-										Exporter.AddColumn(Median);
-									}
 								}
 							}
 						}
@@ -2485,24 +1824,6 @@ afx_msg void CLootBoxDlg::OnExport()
 			AfxMessageBox(_T("Nothing to export"));
 		}
 	}
-}
-
-afx_msg void CLootBoxDlg::OnFetchFfxiah()
-{
-	if (m_FfxiahServer.IsEmpty())
-	{
-		AfxMessageBox(_T("Please select an game server first."));
-		return;
-	}
-
-	ItemArray *pItemList = GetItemMap(m_SelectedChar, m_SelectedTab);
-	if (pItemList == NULL)
-	{
-		AfxMessageBox(_T("No items available to fetch."));
-		return;
-	}
-
-	StartMedianFetch(pItemList);
 }
 
 afx_msg void CLootBoxDlg::OnFileQuit()
@@ -2629,75 +1950,31 @@ afx_msg void CLootBoxDlg::OnOptionsChange(UINT CmdID)
 {
 	FFXiItemList *pInvList = (FFXiItemList*)GetDlgItem(IDC_INVENTORY_LIST);
 	bool CompactListChange = false;
-	ItemArray *pItemMap = NULL;
 	int PrevLang = m_Language;
-	CString PrevServer = m_FfxiahServer;
 
-	pItemMap = GetItemMap(m_SelectedChar, m_SelectedTab);
-
-	CString NewServer;
-	if (TryGetServerNameForCommand(CmdID, NewServer))
+	switch (CmdID)
 	{
-		if (m_FfxiahServer.CompareNoCase(NewServer) != 0)
-			m_FfxiahServer = NewServer;
-	}
-	else
-	{
-		NewServer.Empty();
-	}
-
-	if (NewServer.IsEmpty())
-	{
-		switch (CmdID)
-		{
-			default:
-			case ID_LANGUAGE_JAPANESE:
-				m_Language = FFXI_LANG_JP;
-				break;
-			case ID_LANGUAGE_ENGLISH:
-				m_Language = FFXI_LANG_US;
-				break;
-			case ID_LANGUAGE_FRENCH:
-				m_Language = FFXI_LANG_FR;
-				break;
-			case ID_LANGUAGE_GERMAN:
-				m_Language = FFXI_LANG_DE;
-				break;
-			case ID_VIEW_COMPACTLISTING:
-				CompactListChange = true;
-				m_CompactList = !pInvList->IsCompact();
-				pInvList->SetCompactList(m_CompactList);
-				break;
-		}
+		default:
+		case ID_LANGUAGE_JAPANESE:
+			m_Language = FFXI_LANG_JP;
+			break;
+		case ID_LANGUAGE_ENGLISH:
+			m_Language = FFXI_LANG_US;
+			break;
+		case ID_LANGUAGE_FRENCH:
+			m_Language = FFXI_LANG_FR;
+			break;
+		case ID_LANGUAGE_GERMAN:
+			m_Language = FFXI_LANG_DE;
+			break;
+		case ID_VIEW_COMPACTLISTING:
+			CompactListChange = true;
+			m_CompactList = !pInvList->IsCompact();
+			pInvList->SetCompactList(m_CompactList);
+			break;
 	}
 
-	if (!NewServer.IsEmpty() && m_FfxiahServer.CompareNoCase(PrevServer) != 0)
-	{
-		SaveMedianCacheToIni(PrevServer);
-		m_pIni->SetValue(INI_FILE_CONFIG_SECTION, INI_FILE_FFXIAH_SERVER_KEY, m_FfxiahServer);
-		SetServerMenu(PrevServer, false);
-		SetServerMenu(m_FfxiahServer);
-
-		m_StopMedianThread = true;
-		m_MedianThread = NULL;
-		m_StopMedianThread = false;
-		m_ItemMedianCache.RemoveAll();
-		LoadMedianCacheFromIni(m_FfxiahServer);
-
-		if (pInvList)
-		{
-			int listCount = pInvList->GetItemCount();
-			for (int i = 0; i < listCount; i++)
-			{
-				InventoryItem *pItem = (InventoryItem*)pInvList->GetItemData(i);
-				if (pItem != NULL)
-					pItem->Median = _T("0");
-
-				pInvList->UpdateItemText(_T("0"), i, INVENTORY_LIST_COL_MEDIAN);
-			}
-		}
-	}
-	else if (m_Language != PrevLang)
+	if (m_Language != PrevLang)
 	{
 		m_pIni->SetLongValue(INI_FILE_CONFIG_SECTION, INI_FILE_LANGUAGE_KEY, m_Language);
 		SetLanguageMenu(PrevLang, false);

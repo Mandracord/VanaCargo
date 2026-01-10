@@ -19,9 +19,6 @@
         <BitmapImage x:Key="SearchIcon"
                      UriSource="/Assets/search16.png"
                      CacheOption="OnLoad"/>
-        <BitmapImage x:Key="FetchIcon"
-                     UriSource="/Assets/download16.png"
-                     CacheOption="OnLoad"/>
     </Window.Resources>
 
     <DockPanel>
@@ -112,32 +109,6 @@
                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                 </StackPanel>
                             </Button>
-
-
-                            <Button Name="FetchPricesButton"
-                                    Click="OnFetchPrices"
-                                    IsEnabled="False"
-                                    Padding="10,4"
-                                    Margin="0,0,12,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <Rectangle Width="16"
-                                               Height="16"
-                                               Fill="{DynamicResource ControlForegroundBrush}">
-                                        <Rectangle.OpacityMask>
-                                            <ImageBrush ImageSource="{StaticResource FetchIcon}"
-                                                        Stretch="Uniform"/>
-                                        </Rectangle.OpacityMask>
-                                    </Rectangle>
-                                    <TextBlock Text="Load FFXIAH Prices"
-                                               Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <Button Name="CancelFetchButton"
-                                    Content="Cancel"
-                                    Visibility="Collapsed"
-                                    Padding="10,4"
-                                    Click="OnCancelFetch"/>
 
                         </StackPanel>
                     </ToolBar>

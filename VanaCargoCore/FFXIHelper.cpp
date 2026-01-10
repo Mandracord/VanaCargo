@@ -1439,7 +1439,6 @@ void FFXiHelper::ClearItemData(InventoryItem *pItem)
 		pItem->LogName.Empty();
 		pItem->LogName2.Empty();
 		pItem->ItemDescription.Empty();
-		pItem->Median.Empty();
 		pItem->Jobs.Empty();
 		pItem->Races.Empty();
 		pItem->Slot.Empty();

@@ -64,10 +64,6 @@ BOOL ExportDialog::OnInitDialog()
 	pButton = static_cast<CButton*>(GetDlgItem(IDC_EXPORT_BG_URL));
 	pButton->SetCheck((Value != 0L) ? BST_CHECKED : BST_UNCHECKED);
 
-	Value = m_pIni->GetLongValue(INI_FILE_EXPORT_SECTION, INI_FILE_EXPORT_MEDIAN_KEY);
-	pButton = static_cast<CButton*>(GetDlgItem(IDC_EXPORT_MEDIAN));
-	pButton->SetCheck((Value != 0L) ? BST_CHECKED : BST_UNCHECKED);
-
 	return CDialog::OnInitDialog();
 }
 
@@ -135,11 +131,6 @@ void ExportDialog::OnOK()
 	Checked = (pButton->GetCheck() == BST_CHECKED);
 	m_pIni->SetLongValue(INI_FILE_EXPORT_SECTION, INI_FILE_EXPORT_BG_URL_KEY,
 		Checked ? 1L, ++m_ColumnCount, m_BitMask |= EXPORT_BG_URL : 0L);
-
-	pButton = static_cast<CButton*>(GetDlgItem(IDC_EXPORT_MEDIAN));
-	Checked = (pButton->GetCheck() == BST_CHECKED);
-	m_pIni->SetLongValue(INI_FILE_EXPORT_SECTION, INI_FILE_EXPORT_MEDIAN_KEY,
-		Checked ? 1L, ++m_ColumnCount, m_BitMask |= EXPORT_MEDIAN : 0L);
 
 	if (m_ColumnCount > 0 && m_ExportedCharsCount > 0 && m_BitMask != 0UL)
 		CDialog::OnOK();

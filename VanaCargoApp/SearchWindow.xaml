@@ -134,14 +134,6 @@
                                     Width="140"
                                     Binding="{Binding Item.Remarks}" />
 
-                <DataGridTextColumn Header="Avg FFXIAH Price"
-                                    Width="140"
-                                    Binding="{Binding Item.Median}" />
-
-                <DataGridTextColumn Header="Last FFXIAH Sale"
-                                    Width="140"
-                                    Binding="{Binding Item.LastSale}" />
-
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

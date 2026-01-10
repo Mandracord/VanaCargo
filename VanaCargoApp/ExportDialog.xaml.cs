@@ -48,17 +48,13 @@ namespace VanaCargoApp
             _columns.Add(new ColumnOption { Key = "Jobs", Label = "Jobs", IsSelected = true });
             _columns.Add(new ColumnOption { Key = "Remarks", Label = "Remarks", IsSelected = true });
             _columns.Add(new ColumnOption { Key = "BgWiki", Label = "BG Wiki URL", IsSelected = true });
-            _columns.Add(new ColumnOption { Key = "Median", Label = "Avg FFXIAH Price", IsSelected = false });
-            _columns.Add(new ColumnOption { Key = "LastSale", Label = "Last FFXIAH Sale", IsSelected = false });
 
             CharactersList.ItemsSource = _characters;
             ColumnsList.ItemsSource = _columns;
-            FetchMissingCheck.IsChecked = false;
         }
 
         public IReadOnlyList<CharacterOption> SelectedCharacters => _characters.Where(c => c.IsSelected).ToList();
         public IReadOnlyList<ColumnOption> SelectedColumns => _columns.Where(c => c.IsSelected).ToList();
-        public bool FetchMissingPrices => FetchMissingCheck.IsChecked == true;
 
         private void OnOk(object sender, RoutedEventArgs e)
         {
